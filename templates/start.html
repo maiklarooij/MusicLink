@@ -14,9 +14,13 @@
         </div>
         <div class="card-block d-flex">
             <div class="card-body align-items-center d-flex justify-content-center">
-                <button type="button" class="btn btn-outline-success"><b>Log in</b></button>
+                <form action="/login" method="get">
+                    <button type="submit" class="btn btn-outline-success"><b>Log in</b></button>
+                </form>
                 </p>
-                <button type="button" class="btn btn-outline-secondary"><b>Register</b></button>
+                <form action="/authorise" method="post">
+                    <button class="btn btn-outline-secondary" type="submit">Register</button>
+                </form>
             </div>
         </div>
         <div class="w-100"></div>
