@@ -17,3 +17,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 @app.route("/", methods=["GET"])
 def home():
     return render_template("home.html")
+
+@app.route("/start", methods=["GET"])
+def start():
+    return render_template("start.html")
