@@ -18,6 +18,18 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 def home():
     return render_template("home.html")
 
+
 @app.route("/start", methods=["GET"])
 def start():
     return render_template("start.html")
+
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if request.method == "POST":
+        search = request.form.get("search")
+        types = request.form.get("type")
+        return render_template("searched.html", search=search, types=types)
+
+    else:
+        return render_template("search.html")
+
