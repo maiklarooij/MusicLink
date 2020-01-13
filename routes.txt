@@ -1,0 +1,45 @@
+Routes:
+
+-/register
+    -return registreer template [GET]
+    -slaat gegevens op in db [POST]
+
+-/spotify
+    -stuurt je door naar link spotify [GET]
+
+-/login
+    -return template login [GET]
+    -ingevulde velden in db zetten [POST]
+
+-/start
+    -returnt de pagina om in te loggen en registreren [GET]
+    -knop voor login en registreer [POST]
+
+-/feed
+    -als je naar je feed gaat via het icoon [GET]
+
+-/search
+    -laat de template zien na klikken op icoontje [GET]
+    -zoekknop, zoekt in db spotify [POST]
+
+-/playlist
+    -geeft een aanbevolen playlist[GET]
+    -kruis knop verwijdert dat nummer uit je playlist rendert opnieuw template [POST]
+
+-/friends
+    -laadt de template[GET]
+    -zoekt in de db van users naar de ingevoerde naam [POST]
+
+-/profile
+    -laadt het profiel waar op geklikt wordt [GET]
+
+-/ownprofile
+    -geeft je eigen pagina met instelligen [GET]
+
+-/settings
+    -geeft de settings [GET]
+    -/wachtwoord
+    -/username
+
+-/like
+    -zet het gelikete nummer in een db [POST]
