@@ -1,4 +1,6 @@
-Routes:
+# Technisch ontwerp
+
+### Routes
 
 -/start
     -rendert de start template waar users kunnen inloggen en registreren [GET]
@@ -19,7 +21,6 @@ Routes:
 
 -/home
     -vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
-    -nieuwe token voor user genereren om te gebruiken [GET]
 
 -/search
     -laat de template zien na klikken op icoontje [GET]
@@ -56,13 +57,14 @@ Routes:
 
 -/logout
     -logt de gebruiker uit
-helpers:
+
+### Helpers
 
 - Er is een python bestand die ervoor zorgt dat er tokens kunnen worden opgehaald via spotify
 - Eventueel, wanneer er moeilijke of lange code ontstaat, een nieuw model die dit overzichtelijker maakt. Dit kunnen we altijd zelf beslissen.
   Kan bijvoorbeeld een register en login functie zijn wanneer dit nodig is.
 
-Plugins en framework:
+### Plugins en framework
 
 - Bootstrap voor het ontwerpen van de website https://getbootstrap.com/docs/4.1/getting-started/introduction/
 - Spotipy plugin https://spotipy.readthedocs.io/en/2.6.1/
