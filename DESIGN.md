@@ -2,62 +2,62 @@
 
 ### Routes
 
--/start
+- /start
     -rendert de start template waar users kunnen inloggen en registreren [GET]
 
--/register
+- /register
     -return registreer template [GET]
     -slaat gegevens op in db [POST]
 
--/authorise
+- /authorise
     -stuurt je door naar link spotify [GET]
 
--/callback
+- /callback
     -stuurt spotify de gebruiker naartoe als inloggen bij spotify gelukt is
 
--/login
+- /login
     -return template login [GET]
     -ingevulde velden met db controleren, doorsturen naar home [POST]
 
--/home
+- /home
     -vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
 
--/search
+- /search
     -laat de template zien na klikken op icoontje [GET]
     -zoekknop, zoekt in db spotify [POST]
 
--/playlist
+- /playlist
     -geeft een aanbevolen playlist op basis van luistergedrag [GET]
     -importeren van playlist naar spotify [POST]
 
--/friends
+- /friends
     -template, zoeken naar gebruikers, misschien aanbevolen profielen laten zien op basis van genre [GET]
     -zoekt in de db van users naar de ingevoerde naam [POST]
 
--/profile
+- /profile
     -laadt het profiel waar op geklikt wordt [GET]
 
--/follow
+- /follow
     -volgt de gebruiker (ook op spotify) [POST]
 
--/ownprofile
+- /ownprofile
     -geeft je eigen pagina met luistergedrag [GET]
 
--/settings
+- /settings
     -geeft de settings [GET]
 
--/changepassword
+- /changepassword
     -verandert het wachtwoord [POST]
 
--/changeusername
+- /changeusername
     -verandert de username [POST]
 
--/opensong
+- /opensong
     -opent het aangeklikte nummer in spotify[POST]
 
--/logout
+- /logout
     -logt de gebruiker uit
-
+    
 ### Helpers
 
 - Er is een python bestand die ervoor zorgt dat er tokens kunnen worden opgehaald via spotify
