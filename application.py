@@ -171,3 +171,8 @@ def logout():
     session.clear()
 
     return redirect("/")
+
+@app.route('/ownprofile', methods=["GET"])
+def ownprofile():
+    gebruikersnaam = session["user_id"]
+    return render_template("ownprofie.html", gebruikersnaam=gebruikersnaam)
