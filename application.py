@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
 import spotipy
-import startup
+import authentication
 
 # Configure application
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def start():
 @login_required
 def home():
     if request.method == "GET":
-        oauth = startup.getAccessToken()[0]
+        oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
         full_name = spotify.current_user()["display_name"]
         return render_template("home.html", hoi=full_name)
@@ -73,12 +73,12 @@ def home():
 
 @app.route("/authorise", methods=["POST", "GET"])
 def authorise():
-    response = startup.getUser()
+    response = authentication.getUser()
     return redirect(response)
 
 @app.route('/callback')
 def callback():
-    startup.getUserToken(request.args['code'])
+    authentication.getUserToken(request.args['code'])
     if session.get("user_id") != None:
         return redirect("/home")
     else:
@@ -102,7 +102,7 @@ def register():
 
         # Insert the username and hashed password into users database
         else:
-            oauth = startup.getAccessToken()[0]
+            oauth = authentication.getAccessToken()[0]
             db.execute("INSERT INTO users (username, hash, auth) VALUES (:username, :password, :oauth)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
                         method='pbkdf2:sha256', salt_length=8), oauth=oauth)
@@ -156,7 +156,7 @@ def login():
 @login_required
 def search():
 	if request.method == "POST":
-		oauth = startup.getAccessToken()[0]
+		oauth = authentication.getAccessToken()[0]
 		spotify = spotipy.Spotify(auth=oauth)
 		artists = []
 		pictures = []

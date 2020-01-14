@@ -1,13 +1,28 @@
 import base64, json, requests
 
+#Add your client ID
+CLIENT_ID = "e351ac3d72594cad83fa632150e602df"
+
+#aDD YOUR CLIENT SECRET FROM SPOTIFY
+CLIENT_SECRET = "80dd7e7676fb4a8ca76cedf2e417b57e"
+
+#Port and callback url can be changed or ledt to localhost:5000
+redirect_uri = "https://aed7133f-13a0-4d3f-89bc-a0dea558ee71-ide.cs50.xyz:8080/callback"
+
+#Add needed scope from spotify user
+SCOPE = "streaming user-read-email user-read-private user-read-currently-playing user-read-recently-played user-top-read"
+#token_data will hold authentication header with access code, the allowed scopes, and the refresh countdown
+TOKEN_DATA = []
+
+
 SPOTIFY_URL_AUTH = 'https://accounts.spotify.com/authorize/?'
 SPOTIFY_URL_TOKEN = 'https://accounts.spotify.com/api/token/'
-RESPONSE_TYPE = 'code'   
+RESPONSE_TYPE = 'code'
 HEADER = 'application/x-www-form-urlencoded'
 REFRESH_TOKEN = ''
-    
+
 def getAuth(client_id, redirect_uri, scope):
-    data = "{}client_id={}&response_type=code&redirect_uri={}&scope={}".format(SPOTIFY_URL_AUTH, client_id, redirect_uri, scope) 
+    data = "{}client_id={}&response_type=code&redirect_uri={}&scope={}".format(SPOTIFY_URL_AUTH, client_id, redirect_uri, scope)
     return data
 
 def getToken(code, client_id, client_secret, redirect_uri):
@@ -18,14 +33,14 @@ def getToken(code, client_id, client_secret, redirect_uri):
         "client_id": client_id,
         "client_secret": client_secret
     }
-        
+
     auth_str = f"{client_id}:{client_secret}"
     encoded = base64.urlsafe_b64encode(auth_str.encode()).decode()
-    headers = {"Content-Type" : HEADER, "Authorization" : "Basic {}".format(encoded)} 
+    headers = {"Content-Type" : HEADER, "Authorization" : "Basic {}".format(encoded)}
 
     post = requests.post(SPOTIFY_URL_TOKEN, params=body, headers=headers)
     return handleToken(json.loads(post.text))
-    
+
 def handleToken(response):
     auth_head = {"Authorization": "Bearer {}".format(response["access_token"])}
     REFRESH_TOKEN = response["refresh_token"]
@@ -39,5 +54,20 @@ def refreshAuth():
 
     post_refresh = requests.post(SPOTIFY_URL_TOKEN, data=body, headers=HEADER)
     p_back = json.dumps(post_refresh.text)
-    
+
     return handleToken(p_back)
+
+
+def getUser():
+    return getAuth(CLIENT_ID, redirect_uri, SCOPE)
+
+def getUserToken(code):
+    global TOKEN_DATA
+    TOKEN_DATA = getToken(code, CLIENT_ID, CLIENT_SECRET, redirect_uri)
+
+def refreshToken(time):
+    time.sleep(time)
+    TOKEN_DATA = refreshAuth()
+
+def getAccessToken():
+    return TOKEN_DATA
