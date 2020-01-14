@@ -10,7 +10,7 @@ Door de gebruiksvriendelijke interface is het voor iedereen gemakkelijk zijn/haa
 ### Features
 
 - Gebruikers moeten andere gebruikers kunnen volgen
--	Gebruikers moeten andere gebruikers aanbevolen krijgen gebasseerd op hun favoriete genre
+- Gebruikers moeten andere gebruikers aanbevolen krijgen gebasseerd op hun favoriete genre
 - Gebruikers moeten kunnen zien welke nummers andere gebruikers 'leuk vinden'
 - Gebruikers moeten van zichzelf kunnen zien welke artiesten en nummers ze veel luisteren
 - Gebruikers moeten een persoonlijke playlist krijgen met nummers gebaseerd op luistergedrag
