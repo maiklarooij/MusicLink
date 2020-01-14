@@ -3,7 +3,7 @@
 ### Routes
 
 - /start
-    -rendert de start template waar users kunnen inloggen en registreren [GET]
+    - rendert de start template waar users kunnen inloggen en registreren [GET]
 
 - /register
     -return registreer template [GET]
