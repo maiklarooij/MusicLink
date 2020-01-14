@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <link href="/static/styles.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link href="/static/favicon.ico" rel="icon">
+
     <title>MusicLink: {% block title %}{% endblock %}</title>
 </head>
 <body>
 
     {% if session.user_id %}
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-            <a href="/" class="navbar-brand" id="brand">MusicLink</a>
+            <a href="/home" class="navbar-brand" id="brand">MusicLink</a>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav mr-auto">
-                    <li id="navitem" class="nav-item"><a class="nav-link" href="/start">Home</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/home">Home</a></li>
                     <li id="navitem" class="nav-item"><a class="nav-link" href="/search">Search</a></li>
                     <li id="navitem" class="nav-item"><a class="nav-link" href="/sell">Playlist</a></li>
                     <li id="navitem" class="nav-item"><a class="nav-link" href="/add">Profile</a></li>
@@ -24,7 +32,7 @@
 
         {% else %}
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-            <a href="/" class="navbar-brand" id="brand">MusicLink</a>
+            <a href="/home" class="navbar-brand" id="brand">MusicLink</a>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto">
                     <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log In</a></li>
