@@ -175,3 +175,11 @@ def search():
 
 	else:
 		return render_template("search.html")
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    session.clear()
+
+    return redirect("/")
