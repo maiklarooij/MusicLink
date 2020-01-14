@@ -75,7 +75,7 @@ def register():
 
         # Ensure that the username is not taken
         if len(db.execute("SELECT * FROM users WHERE username = :username",
-                          username=request.form.get("username"))) != 0:
+            username=request.form.get("username"))) != 0:
             return apology("username already exists")
 
         # Insert the username and hashed password into users database
