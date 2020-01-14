@@ -161,20 +161,17 @@ def search():
 		artists = []
 		pictures = []
 		input = request.form.get("search")
-		albums = spotify.search(q='artist:' + input, type='artist')["artists"]["items"]
+		searchtype = request.form.get("type")
+		albums = spotify.search(q='artist:' + input, type=searchtype)
 
-		for album in albums:
-			artists.append(album['name'])
-			if len(album["images"]) != 0:
-				pictures.append(album['images'][2]['url'])
-			else:
-				pictures.append('https://image.shutterstock.com/image-vector/prohibition-no-photo-sign-vector-260nw-449151856.jpg')
+		#for album in albums:
+		#	artists.append(album['name'])
+		#	if len(album["images"]) != 0:
+	#			pictures.append(album['images'][2]['url'])
+	#		else:
+	#			pictures.append('https://image.shutterstock.com/image-vector/prohibition-no-photo-sign-vector-260nw-449151856.jpg')
 
-		recent = spotify.current_user_recently_played()['items']
-
-		recent = [recen['track']['name'] for recen in recent]
-
-		return render_template("searched.html", artists=artists, pictures=pictures, recent=recent)
+		return render_template("searched.html", artists=albums, pictures=pictures)
 
 	else:
 		return render_template("search.html")
