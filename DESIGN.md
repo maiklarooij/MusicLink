@@ -6,57 +6,57 @@
     - rendert de start template waar users kunnen inloggen en registreren [GET]
 
 - /register
-    -return registreer template [GET]
-    -slaat gegevens op in db [POST]
+    - return registreer template [GET]
+    - slaat gegevens op in db [POST]
 
 - /authorise
-    -stuurt je door naar link spotify [GET]
+    - stuurt je door naar link spotify [GET]
 
 - /callback
-    -stuurt spotify de gebruiker naartoe als inloggen bij spotify gelukt is
+    - stuurt spotify de gebruiker naartoe als inloggen bij spotify gelukt is
 
 - /login
-    -return template login [GET]
-    -ingevulde velden met db controleren, doorsturen naar home [POST]
+    - return template login [GET]
+    - ingevulde velden met db controleren, doorsturen naar home [POST]
 
 - /home
-    -vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
+    - vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
 
 - /search
-    -laat de template zien na klikken op icoontje [GET]
-    -zoekknop, zoekt in db spotify [POST]
+    - laat de template zien na klikken op icoontje [GET]
+    - zoekknop, zoekt in db spotify [POST]
 
 - /playlist
-    -geeft een aanbevolen playlist op basis van luistergedrag [GET]
-    -importeren van playlist naar spotify [POST]
+    - geeft een aanbevolen playlist op basis van luistergedrag [GET]
+    - importeren van playlist naar spotify [POST]
 
 - /friends
-    -template, zoeken naar gebruikers, misschien aanbevolen profielen laten zien op basis van genre [GET]
-    -zoekt in de db van users naar de ingevoerde naam [POST]
+    - template, zoeken naar gebruikers, misschien aanbevolen profielen laten zien op basis van genre [GET]
+    - zoekt in de db van users naar de ingevoerde naam [POST]
 
 - /profile
-    -laadt het profiel waar op geklikt wordt [GET]
+    - laadt het profiel waar op geklikt wordt [GET]
 
 - /follow
-    -volgt de gebruiker (ook op spotify) [POST]
+    - volgt de gebruiker (ook op spotify) [POST]
 
 - /ownprofile
-    -geeft je eigen pagina met luistergedrag [GET]
+    - geeft je eigen pagina met luistergedrag [GET]
 
 - /settings
-    -geeft de settings [GET]
+    - geeft de settings [GET]
 
 - /changepassword
-    -verandert het wachtwoord [POST]
+    - verandert het wachtwoord [POST]
 
 - /changeusername
-    -verandert de username [POST]
+    - verandert de username [POST]
 
 - /opensong
-    -opent het aangeklikte nummer in spotify[POST]
+    - opent het aangeklikte nummer in spotify[POST]
 
 - /logout
-    -logt de gebruiker uit
+    - logt de gebruiker uit
     
 ### Helpers
 
