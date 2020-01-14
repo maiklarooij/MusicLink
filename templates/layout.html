@@ -5,20 +5,34 @@
     <title>MusicLink: {% block title %}{% endblock %}</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-        <a href="/" class="navbar-brand" id="brand">MusicLink</a>
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="navbar-nav mr-auto">
-                <li id="navitem" class="nav-item"><a class="nav-link" href="/start">Home</a></li>
-                <li id="navitem" class="nav-item"><a class="nav-link" href="/search">Search</a></li>
-                <li id="navitem" class="nav-item"><a class="nav-link" href="/sell">Playlist</a></li>
-                <li id="navitem" class="nav-item"><a class="nav-link" href="/add">Profile</a></li>
-            </ul>
-            <ul class="navbar-nav ml-auto">
-                <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
-            </ul>
-        </div>
-    </nav>
+
+    {% if session.user_id %}
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a href="/" class="navbar-brand" id="brand">MusicLink</a>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav mr-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/start">Home</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/search">Search</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/sell">Playlist</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/add">Profile</a></li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        {% else %}
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <a href="/" class="navbar-brand" id="brand">MusicLink</a>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav ml-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log In</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Registreer</a></li>
+                </ul>
+            </div>
+        </nav>
+        {% endif %}
 
     <main class="container p-5">
         {% block main %}{% endblock %}
