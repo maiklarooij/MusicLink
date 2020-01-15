@@ -178,3 +178,12 @@ def logout():
 def ownprofile():
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
     return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'])
+
+@app.route('/friends')
+@login_required
+def friends():
+
+    if request.method == "POST":
+        return render_template("friends.html")
+    else:
+        return render_template("friends.html")

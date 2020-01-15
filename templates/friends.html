@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <form action="/search" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="Search for..." type="text">
+        </div>
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+
+    <hr class="featurette-divider">
+
+    <div class="container marketing">
+        <div class="row">
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

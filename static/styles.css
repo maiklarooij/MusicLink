@@ -32,9 +32,18 @@ main .form-control
 }
 
 #startdiv {
-    background-image: url("http://europeanpilotacademy.com/wp-content/uploads/2018/08/simple-powerpoint-background-professional-simple-background-for-powerpoint-simple-geometric-background-1.jpg");
+    background-image: url("https://ak5.picdn.net/shutterstock/videos/31097155/thumb/1.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
 }
 
 #musiclink {
     font-family: papyrus;
 }
+
+body {
+    padding-top: 8em;
+}
+
+
