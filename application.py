@@ -30,6 +30,7 @@ db = SQL("sqlite:///musiclink.db")
 
 @app.route("/", methods=["GET"])
 def start():
+    session.clear()
 
     return render_template("start.html")
 
@@ -173,6 +174,7 @@ def logout():
     return redirect("/")
 
 @app.route('/ownprofile', methods=["GET"])
+@login_required
 def ownprofile():
     gebruikersnaam = session["user_id"]
-    return render_template("ownprofie.html", gebruikersnaam=gebruikersnaam)
+    return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam)
