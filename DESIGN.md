@@ -3,66 +3,65 @@
 ### Routes
 
 - /start
-    - rendert de start template waar users kunnen inloggen en registreren [GET]
+    - Rendert de start template waar users kunnen inloggen en registreren [GET]
 
 - /register
-    - return registreer template [GET]
-    - slaat gegevens op in db [POST]
+    - Return registreer template [GET]
+    - Slaat gegevens op in database [POST]
 
 - /authorise
-    - stuurt je door naar link spotify [GET]
+    - Stuurt je door naar de link waar gebruikers inloggen bij Spotify [GET]
 
 - /callback
-    - stuurt spotify de gebruiker naartoe als inloggen bij spotify gelukt is
+    - Na authenticatie bij Spotify komt de gebruiker op deze route terecht, alleen nodig om door te sturen naar homepage.
 
 - /login
-    - return template login [GET]
-    - ingevulde velden met db controleren, doorsturen naar home [POST]
+    - Return template login [GET]
+    - Ingevulde velden met db controleren, doorsturen naar home [POST]
 
 - /home
-    - vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
+    - Vriendenfeed en aanbevolen nummers op basis van vrienden [POST]
 
 - /search
-    - laat de template zien na klikken op icoontje [GET]
-    - zoekknop, zoekt in db spotify [POST]
+    - Laat de template zien na klikken op icoontje [GET]
+    - Zoekknop, zoekt in db spotify [POST]
 
 - /playlist
-    - geeft een aanbevolen playlist op basis van luistergedrag [GET]
-    - importeren van playlist naar spotify [POST]
+    - Geeft een aanbevolen playlist op basis van luistergedrag [GET]
+    - Importeren van playlist naar spotify [POST]
 
 - /friends
-    - template, zoeken naar gebruikers, misschien aanbevolen profielen laten zien op basis van genre [GET]
-    - zoekt in de db van users naar de ingevoerde naam [POST]
+    - Template, zoeken naar gebruikers, misschien aanbevolen profielen laten zien op basis van genre [GET]
+    - Zoekt in de db van users naar de ingevoerde naam [POST]
 
 - /profile
-    - laadt het profiel waar op geklikt wordt [GET]
+    - Laadt het profiel waar op geklikt wordt [GET]
 
 - /follow
-    - volgt de gebruiker (ook op spotify) [POST]
+    - Volgt de gebruiker (ook op spotify) [POST]
 
 - /ownprofile
-    - geeft je eigen pagina met luistergedrag [GET]
+    - Geeft je eigen pagina met luistergedrag [GET]
 
 - /settings
-    - geeft de settings [GET]
+    - Geeft de settings [GET]
 
 - /changepassword
-    - verandert het wachtwoord [POST]
+    - Verandert het wachtwoord [POST]
 
 - /changeusername
-    - verandert de username [POST]
+    - Verandert de username [POST]
 
 - /opensong
-    - opent het aangeklikte nummer in spotify[POST]
+    - Opent het aangeklikte nummer in spotify[POST]
 
 - /logout
-    - logt de gebruiker uit
-    
+    - Logt de gebruiker uit
+
 ### Helpers
 
 - Er is een python bestand die ervoor zorgt dat er tokens kunnen worden opgehaald via spotify
-- Eventueel, wanneer er moeilijke of lange code ontstaat, een nieuw model die dit overzichtelijker maakt. Dit kunnen we altijd zelf beslissen.
-  Kan bijvoorbeeld een register en login functie zijn wanneer dit nodig is.
+- Helpers.py die lange stukken code verwerkt zodat dit niet in application hoeft te staan. (Voorbeeld: updaten van databases wanneer die veel code betreft)
 
 ### Plugins en framework
 

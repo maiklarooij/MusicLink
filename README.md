@@ -2,30 +2,29 @@
 
 ### Samenvatting
 
-"MusicLink" is een online sociaal netwerksite die gericht is op het ontdekken van nieuwe muziek op basis van wat een gebruiker zelf luistert en wat anderen aanbevelen.
+"MusicLink" is een online sociaal netwerksite die gericht is op het ontdekken van nieuwe muziek. Gebruikers krijgen aanbevelingen op basis van eigen luistergedrag en het luistergedrag van gebruikers die gevolgd kunnen worden.
 Het is ontworpen om ten alle tijden statistieken van een gebruiker over meest geluisterde nummers, artiesten en genres op Spotify toegankelijk te maken voor iedereen.
-Daarbij is het ook mogelijk om muziek die een gebruiker leuk vind aan mensen aan zijn/haar volgers aan te bevelen.
 Door de gebruiksvriendelijke interface is het voor iedereen gemakkelijk zijn/haar muziek kennis uit te breiden en verbonden te zijn met de muziek van een ander.
-
-### Features
-
-- Gebruikers moeten andere gebruikers kunnen volgen
-- Gebruikers moeten andere gebruikers aanbevolen krijgen gebasseerd op hun favoriete genre
-- Gebruikers moeten kunnen zien welke nummers andere gebruikers 'leuk vinden'
-- Gebruikers moeten van zichzelf kunnen zien welke artiesten en nummers ze veel luisteren
-- Gebruikers moeten een persoonlijke playlist krijgen met nummers gebaseerd op luistergedrag
-- Gebruikers moeten kunnen zoeken naar nummers en artiesten
-
 
 ### Minimum Viable Product
 
 - Gebruikers moeten kunnen registreren en inloggen
-- Gebruikers moeten kunnen zoeken naar nummers en artiesten
+- Gebruikers moeten kunnen inloggen bij Spotify
+- Gebruikers moeten kunnen zoeken naar nummers, artiesten en albums
 - Gebruikers moeten andere gebruikers kunnen zoeken en volgen
-- Gebruikers moeten nummers kunnen 'aanbevelen'
-- Gebruikers moeten statistieken op hun persoonlijke profiel zien
+- Gebruikers moeten aanbevolen nummers krijgen op basis van favoriete artiesten en nummers van vrienden (Gebruikers die gevolgd worden)
+- Gebruikers moeten eigen luisterstatistieken op hun persoonlijke profiel zien
+- Gebruikers moeten username en wachtwoord kunnen veranderen
+
+### Extra features
+
+- Gebruikers moeten andere gebruikers aanbevolen krijgen gebaseerd op hun favoriete genre
+- Gebruikers moeten een playlist kunnen genereren op basis van eigen luistergedrag
+- Gebruikers moeten deze playlist in Spotify kunnen importeren
+- Gebruikers moeten gebruikers die ze volgen op MusicLink ook op Spotify zelf volgen
 - Gebruikers moeten statistieken op het persoonlijke profiel van anderen zien
-- Gebruikers moeten een feed zien van nummers die worden aanbevolen door de personen die zij volgen
+- Gebruikers moeten statistieken kunnen zien waarbij ze kiezen voor korte of lange termijn, of alltime
+- Gebruikers moeten nummers kunnen delen die dan terechtkomen op de feed van hun volgers
 
 ### Afhankelijkheden
 
