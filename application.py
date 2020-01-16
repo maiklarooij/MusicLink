@@ -176,8 +176,29 @@ def logout():
 @app.route('/ownprofile')
 @login_required
 def ownprofile():
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])
+    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=(session["user_id"] + 1))
+    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=(session["user_id"] + 1))
+
+    genres = []
+    for genre in top_genres[0]:
+        genres.append(top_genres[0][genre])
+
+    artists = []
+    for artist in top_artists[0]:
+        artiest = spotify.artist(top_artists[0][artist])
+        artists.append((artiest['name'], artiest['images'][0]['url']))
+
+    nummer_artiest = []
+    for liedje in top_tracks[0]:
+        nummer = spotify.track(top_tracks[0][liedje])
+        nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
-    return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'])
+    return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], top_tracks=nummer_artiest, top_artists=artists, genres=genres)
 
 @app.route('/friends')
 @login_required
