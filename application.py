@@ -180,8 +180,8 @@ def ownprofile():
     spotify = spotipy.Spotify(auth=oauth)
 
     top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])
-    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=(session["user_id"] + 1))
-    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=(session["user_id"] + 1))
+    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
+    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])
 
     genres = []
     for genre in top_genres[0]:
