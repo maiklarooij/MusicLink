@@ -5,38 +5,32 @@
 {% endblock %}
 
 {% block main %}
-    <h3>@{{ gebruikersnaam }} </h3>
+    <h3 style="padding-bottom: 60px;">{{ gebruikersnaam }} <button type="button" class="btn btn-outline-secondary">Edit Profile</button></h3>
     </p>
 
-    <div style='float:left; width:30%'>
+    <div style='float:left; width:30%' style="padding-bottom: 60px;">
         <b>Most listened songs</b>
         <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Morbi leo risus</li>
-            <li class="list-group-item">Porta ac consectetur ac</li>
-            <li class="list-group-item">Vestibulum at eros</li>
+            {% for nummer in top_tracks %}
+            <li class="list-group-item"><img src= {{ nummer[2] }} alt="nummer" width="35" height="35" align="left">{{ nummer[0] }} - {{ nummer[1] }}</li>
+            {% endfor %}
         </ul>
     </div>
 
     <div style='float:left; width:30%; margin-left:35px'>
-        <b>Most listened songs</b>
+        <b>Most listened artists</b>
         <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Morbi leo risus</li>
-            <li class="list-group-item">Porta ac consectetur ac</li>
-            <li class="list-group-item">Vestibulum at eros</li>
+            {% for artist in top_artists %}
+            <li class="list-group-item"><img src= {{ artist[1] }} alt="nummer" width="35" height="35" align="left">{{ artist[0] }}</li>
+            {% endfor %}
         </ul>
     </div>
     <div style='float:left; width:30%; margin-left:35px'>
-        <b>Most listened songs</b>
+        <b>Favorite genres</b>
         <ul class="list-group list-group-flush">
-            <li class="list-group-item">Cras justo odio</li>
-            <li class="list-group-item">Dapibus ac facilisis in</li>
-            <li class="list-group-item">Morbi leo risus</li>
-            <li class="list-group-item">Porta ac consectetur ac</li>
-            <li class="list-group-item">Vestibulum at eros</li>
+            {% for genre in genres %}
+            <li class="list-group-item">{{ genre }}</li>
+            {% endfor %}
         </ul>
     </div>
 
