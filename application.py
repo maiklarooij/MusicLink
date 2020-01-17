@@ -251,3 +251,67 @@ def follow():
 @login_required
 def settings():
     return render_template("settings.html")
+
+@app.route("/changepassword", methods=["GET", "POST"])
+@login_required
+def changepassword():
+    """Let's the user change the password"""
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure old password, new password and confirmation were submitted
+        if not request.form.get("oldpass") or not request.form.get("newpass") or not request.form.get("confirmation"):
+            return apology("fill in all fields")
+
+        # Ensure that the old password is the same as currently stored in database
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("oldpass")):
+            return apology("old password wrong")
+
+        # Ensure that old and new password are not the same
+        elif request.form.get("oldpass") == request.form.get("newpass"):
+            return apology("choose a new password")
+
+        # Ensure that new password and confirmation match
+        elif request.form.get("newpass") != request.form.get("confirmation"):
+            return apology("the passwords do not match")
+
+        # Update the users password
+        db.execute("UPDATE users SET hash = :password", password=generate_password_hash(request.form.get("newpass")))
+
+        # Redirect user to home page
+        return redirect("/ownprofile")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("changepassword.html")
+
+@app.route("/changeusername", methods=["GET", "POST"])
+@login_required
+def changeusername():
+    """Let's the user change the username"""
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])
+        # Ensure old password, new password and confirmation were submitted
+        if not request.form.get("password") or not request.form.get("newusername"):
+            return apology("fill in all fields")
+
+        # Ensure that the old password is the same as currently stored in database
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("password")):
+            return apology("Password wrong")
+
+        # Ensure that old and new username are not the same
+        elif request.form.get("newusername") == username:
+            return apology("Choose a new username")
+
+        # Update the users password
+        db.execute("UPDATE users SET username = :username WHERE userid = :userid", username=request.form.get("newusername"), userid=session["user_id"])
+
+        # Redirect user to home page
+        return redirect("/ownprofile")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    elif request.method == "GET":
+        return render_template("changeusername.html")
