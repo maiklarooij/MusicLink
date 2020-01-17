@@ -30,12 +30,20 @@
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto">
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+                        <li id="navitem" class="nav-item"><a class="nav-link" href="/authorise">Register</a></li>
                         <li id="navitem" class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
                     </ul>
                 {% endif %}
             </div>
         </nav>
+
+        {% if get_flashed_messages() %}
+            <header class="alert">
+                <div class="alert alert-primary border text-center" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                </div>
+            </header>
+        {% endif %}
 
     <main>
         {% block main %}{% endblock %}

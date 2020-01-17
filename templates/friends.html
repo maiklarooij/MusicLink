@@ -5,14 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/search" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="Search for..." type="text">
-        </div>
-        <button class="btn btn-outline-primary" type="submit">Search</button>
-    </form>
+    <input autocomplete="off" autofocus placeholder="Search for..." type="text" class="search">
+
+    <ul id='results'></ul>
 
     <hr class="featurette-divider">
+
+    <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
 
     <div class="container marketing">
         <div class="row">
@@ -22,7 +21,7 @@
                 <h2>Enzo</h2>
                 <p>Same genres: rap, pop</p>
                 <p>
-                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                    <button id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</button>
                 </p>
             </div>
             <div class="col-lg-4">
@@ -31,7 +30,7 @@
                 <h2>Enzo</h2>
                 <p>Same genres: rap, pop</p>
                 <p>
-                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                    <a id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</a>
                 </p>
             </div>
             <div class="col-lg-4">
@@ -40,9 +39,20 @@
                 <h2>Enzo</h2>
                 <p>Same genres: rap, pop</p>
                 <p>
-                    <a class="btn btn-primary" href='/follow' role="button">Follow</a>
+                    <a id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</a>
                 </p>
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        let input = document.querySelector('.search');
+        input.onkeyup = function() {
+            $.get('/friendssearch?q=' + input.value, function(data) {
+                document.querySelector('#results').innerHTML = data;
+            });
+        };
+
+    </script>
 {% endblock %}
