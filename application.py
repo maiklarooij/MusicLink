@@ -170,26 +170,33 @@ def login():
 @app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
-	if request.method == "POST":
-		oauth = authentication.getAccessToken()[0]
-		spotify = spotipy.Spotify(auth=oauth)
-		artists = []
-		pictures = []
-		input = request.form.get("search")
-		searchtype = request.form.get("type")
-		albums = spotify.search(q='artist:' + input, type=searchtype)
+    if request.method == "POST":
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+        artists = []
+        pictures = []
+        track_result = dict()
+        album_result = dict()
+        artist_result = dict()
+        duration = []
+        input = request.form.get("search")
+        searchtype = request.form.get("type")
+        if searchtype == 'track':
+            track_result = spotify.search(q='track:' + input, type=searchtype)
+        elif searchtype == "artist":
+            artist_result = spotify.search(q='artist:' + input, type=searchtype)
+        elif searchtype == 'album':
+            album_result = spotify.search(q='album:' + input, type=searchtype)
+        if not artist_result:
+            if not track_result:
+                if not album_result:
+                    return apology("No results", 404)
 
-		#for album in albums:
-		#	artists.append(album['name'])
-		#	if len(album["images"]) != 0:
-	#			pictures.append(album['images'][2]['url'])
-	#		else:
-	#			pictures.append('https://image.shutterstock.com/image-vector/prohibition-no-photo-sign-vector-260nw-449151856.jpg')
+        return render_template("searched.html", track_result=track_result, artist_result=artist_result,
+                                album_result=album_result, pictures=pictures, duration=duration)
 
-		return render_template("searched.html", artists=albums, pictures=pictures)
-
-	else:
-		return render_template("search.html")
+    else:
+        return render_template("search.html")
 
 @app.route("/logout")
 def logout():
@@ -257,3 +264,8 @@ def follow():
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
         flash(f"Successfully unfollowed {username}!")
     return redirect("/home")
+
+@app.route('/settings')
+@login_required
+def settings():
+    return render_template("settings.html")

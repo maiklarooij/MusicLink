@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register
+    Profile
 {% endblock %}
 
 {% block main %}
-    <h3 style="padding-bottom: 60px;">{{ gebruikersnaam }} <button type="button" class="btn btn-outline-secondary">Edit Profile</button></h3>
+    <h3 style="padding-bottom: 60px;">{{ gebruikersnaam }} <form id="login" action="/settings"><button class="btn btn-secondary" id="submit" type="submit">Edit profile</button></form></h3>
     </p>
 
     <div style='float:left; width:30%' style="padding-bottom: 60px;">
