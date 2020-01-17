@@ -246,3 +246,8 @@ def follow():
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
         flash(f"Successfully unfollowed {username}!")
     return redirect("/home")
+
+@app.route('/settings')
+@login_required
+def settings():
+    return render_template("settings.html")
