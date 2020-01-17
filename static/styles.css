@@ -20,6 +20,8 @@
 
 main {
     text-align: center;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 main .form-control

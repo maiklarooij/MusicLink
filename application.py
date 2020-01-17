@@ -77,6 +77,12 @@ def authorise():
 def callback():
     authentication.getUserToken(request.args['code'])
     if session.get("user_id") != None:
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+
+        profilepic = spotify.current_user()["images"][0]["url"]
+
+        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
     else:
         return redirect("/register")
@@ -102,10 +108,11 @@ def register():
             spotify = spotipy.Spotify(auth=oauth)
 
             spotify_id = spotify.current_user()["id"]
+            profilepic = spotify.current_user()["images"][0]["url"]
 
-            db.execute("INSERT INTO users (username, hash, spotifyid) VALUES (:username, :password, :spotifyid)",
+            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
 
             rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
@@ -232,7 +239,11 @@ def friendssearch():
 @app.route('/friends', methods=["GET"])
 @login_required
 def friends():
-    return render_template("friends.html")
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    user = spotify.user("1127911071")['images'][0]['url']
+    return render_template("friends.html", user=user)
 
 @app.route('/follow', methods=["POST"])
 @login_required
