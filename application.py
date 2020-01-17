@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from collections import Counter
 
+import random
 import spotipy
 import authentication
 from helpers import login_required, apology, update_database_top
@@ -43,12 +44,28 @@ def home():
 
     update_database_top(spotify)
 
-    if request.method == "GET":
-        full_name = spotify.current_user()["display_name"]
-        return render_template("home.html", hoi=full_name)
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session['user_id'])
+    if len(followinglist) != 0:
+        following = []
+        for followed in followinglist:
+            following.append(followed['followeduserid'])
 
-    else:
-         return render_template("home.html")
+        tracks = []
+        for userid in following:
+            tracks.append(db.execute("SELECT track1 FROM top WHERE userid = :userid", userid=userid)[0]['track1'])
+            tracks.append(db.execute("SELECT track2 FROM top WHERE userid = :userid", userid=userid)[0]['track2'])
+            tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=userid)[0]['track3'])
+            tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=userid)[0]['track4'])
+            tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=userid)[0]['track5'])
+
+        recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
+        titles = []
+        for recommendation in recommendations:
+            titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
+
+        return render_template("home.html", titles=titles)
+
+    return render_template("home.html")
 
 
 @app.route("/authorise", methods=["POST", "GET"])
@@ -97,6 +114,8 @@ def register():
 
             db.execute("INSERT INTO top (userid) VALUES (:userid)", userid=session["user_id"])
 
+
+        flash('Succesfully registered!')
         # Redirect user to home page
         return redirect("/home")
 
@@ -200,11 +219,30 @@ def ownprofile():
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
     return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], top_tracks=nummer_artiest, top_artists=artists, genres=genres)
 
-@app.route('/friends')
+
+@app.route('/friendssearch', methods=["GET"])
+@login_required
+def friendssearch():
+    users = [user["username"] for user in db.execute("SELECT username FROM users")]
+    users.remove(db.execute("SELECT username FROM users WHERE userid=:userid", userid=session['user_id'])[0]['username'])
+    q = request.args.get("q")
+    results = [user for user in users if q if user.upper().startswith(q.upper())]
+    return render_template("friendssearch.html", results=results)
+
+@app.route('/friends', methods=["GET"])
 @login_required
 def friends():
+    return render_template("friends.html")
 
-    if request.method == "POST":
-        return render_template("friends.html")
+@app.route('/follow', methods=["POST"])
+@login_required
+def follow():
+    username = request.form.get('follow')
+    usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
+    if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
+        db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
+        flash(f"Successfully followed {username}!")
     else:
-        return render_template("friends.html")
+        db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
+        flash(f"Successfully unfollowed {username}!")
+    return redirect("/home")
