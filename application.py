@@ -77,6 +77,12 @@ def authorise():
 def callback():
     authentication.getUserToken(request.args['code'])
     if session.get("user_id") != None:
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+
+        profilepic = spotify.current_user()["images"][0]["url"]
+
+        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
     else:
         return redirect("/register")
@@ -102,10 +108,11 @@ def register():
             spotify = spotipy.Spotify(auth=oauth)
 
             spotify_id = spotify.current_user()["id"]
+            profilepic = spotify.current_user()["images"][0]["url"]
 
-            db.execute("INSERT INTO users (username, hash, spotifyid) VALUES (:username, :password, :spotifyid)",
+            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
 
             rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
@@ -163,26 +170,33 @@ def login():
 @app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
-	if request.method == "POST":
-		oauth = authentication.getAccessToken()[0]
-		spotify = spotipy.Spotify(auth=oauth)
-		artists = []
-		pictures = []
-		input = request.form.get("search")
-		searchtype = request.form.get("type")
-		albums = spotify.search(q='artist:' + input, type=searchtype)
+    if request.method == "POST":
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+        artists = []
+        pictures = []
+        track_result = dict()
+        album_result = dict()
+        artist_result = dict()
+        duration = []
+        input = request.form.get("search")
+        searchtype = request.form.get("type")
+        if searchtype == 'track':
+            track_result = spotify.search(q='track:' + input, type=searchtype)
+        elif searchtype == "artist":
+            artist_result = spotify.search(q='artist:' + input, type=searchtype)
+        elif searchtype == 'album':
+            album_result = spotify.search(q='album:' + input, type=searchtype)
+        if not artist_result:
+            if not track_result:
+                if not album_result:
+                    return apology("No results", 404)
 
-		#for album in albums:
-		#	artists.append(album['name'])
-		#	if len(album["images"]) != 0:
-	#			pictures.append(album['images'][2]['url'])
-	#		else:
-	#			pictures.append('https://image.shutterstock.com/image-vector/prohibition-no-photo-sign-vector-260nw-449151856.jpg')
+        return render_template("searched.html", track_result=track_result, artist_result=artist_result,
+                                album_result=album_result, pictures=pictures, duration=duration)
 
-		return render_template("searched.html", artists=albums, pictures=pictures)
-
-	else:
-		return render_template("search.html")
+    else:
+        return render_template("search.html")
 
 @app.route("/logout")
 def logout():
@@ -232,7 +246,11 @@ def friendssearch():
 @app.route('/friends', methods=["GET"])
 @login_required
 def friends():
-    return render_template("friends.html")
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    user = spotify.user("1127911071")['images'][0]['url']
+    return render_template("friends.html", user=user)
 
 @app.route('/follow', methods=["POST"])
 @login_required

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Home
+    Results
 {% endblock %}
 
 {% block main %}
@@ -17,5 +17,87 @@
         <button class="btn btn-outline-primary" type="submit">Search</button>
     </form>
 
-    {{ artists }} {{ pictures }}
+    <table class="table table-hover table-striped ">
+
+    <!---Track Results--->
+    {% if track_result|length > 0 %}
+         <thead>
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Artist</th>
+                <th scope="col">Album</th>
+                <th scope="col">Length</th>
+                <th scope="col">Spotify Link</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            {% for track in track_result['tracks']['items'] %}
+                <td>{{ track['name'] }}</td>
+                <!---artist--->
+                <td>{{ track['album']['artists'][0]['name'] }}</td>
+                <td>{{ track['album']['name'] }}</td>
+                <td> {{ track['duration_ms'] }} </td>
+                <!---photo--->
+                <!--<td><img src= "{{ track['album']['images'][0]['url'] }}" width='100px' height='100px'/></td>-->
+
+                <!---spotify link--->
+                <td><a href='{{ track['external_urls']['spotify'] }}'>Open in spotify</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    {{ artist_result }}
+    <!---artist results--->
+    {% elif artist_result|length > 0 %}
+        <thead>
+
+            <tr>
+                <th scope="col">HERE</th>
+                <th scope="col">Artist</th>
+                <th scope="col">Spotify Link</th>
+
+            </tr>
+        </thead>
+         <tbody>
+            <tr>
+            {% for artist in artist_result['artists']['items'] %}
+
+                <!--{% if artist['images'] | length > 0 %}-->
+                <td><img src= "{{ artist['images'][0]['url'] }}"  width='80px' height='80px'/></td>
+                <!--{% endif %}-->
+                <td>{{ artist['name'] }}</td>
+                <td><a href='{{ artist['external_urls']['spotify'] }}'>Open in spotify</a></td>
+            </tr>
+
+            {% endfor %}
+         </tbody>
+
+    <!--album results-->
+    {% elif album_result|length > 0 %}
+
+    <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Album</th>
+                <th scope="col">Artist</th>
+                <th scope="col">Spotify Link</th>
+
+            </tr>
+    </thead>
+        <tbody>
+            {% for result in album_result['albums']['items'] %}
+            <tr>
+            <td><img src= "{{ result['images'][0]['url'] }}" width='100px' height='100px'/></td>
+            <td>{{ result['name'] }}</td>
+            <td>{{ result['artists'][0]['name'] }}</td>
+            <td><a href='{{ result['external_urls']['spotify'] }}'>Open in spotify</a></td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    {% endif %}
+    </table>
+
 {% endblock %}
