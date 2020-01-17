@@ -9,12 +9,19 @@
     </head>
     <body>
         {% for result in results %}
-            <li style="list-style-type: none">
-                {{ result }}
-                <form action="/follow" method="post">
+            <div class="row" style="margin-left: 400px; margin-right: 400px;">
+                <div class="col">
+                    <div class="center-cropped" style="background-image: url({{ result['profilepic'] }}"></div>
+                </div>
+                <div class="col">
+                    {{ result['username'] }}
+                </div>
+                <div class="col">
+                    <form action="/follow" method="post">
                     <button type="submit" class="btn btn-success btn-sm" value="{{ result }}" name='follow'>(Un)Follow</button>
                 </form>
-            </li>
+                </div>
+            </div>
         {% endfor %}
     </body>
 
