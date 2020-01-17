@@ -32,9 +32,22 @@ main .form-control
 }
 
 #startdiv {
-    background-image: url("https://ak4.picdn.net/shutterstock/videos/6938674/thumb/1.jpg");
+    background-image: url("https://ak5.picdn.net/shutterstock/videos/31097155/thumb/1.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
 }
 
 #musiclink {
     font-family: papyrus;
+}
+
+
+body {
+    padding-top: 8em;
+}
+
+#friendspage {
+    padding-bottom: 2em;
+    padding-top: 1em;
 }

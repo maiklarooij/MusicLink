@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <input autocomplete="off" autofocus placeholder="Search for..." type="text" class="search">
+
+    <ul id='results'></ul>
+
+    <hr class="featurette-divider">
+
+    <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
+
+    <div class="container marketing">
+        <div class="row">
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <button id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</button>
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <a id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</a>
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <img class="rounded-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="140" height="140">
+                <p></p>
+                <h2>Enzo</h2>
+                <p>Same genres: rap, pop</p>
+                <p>
+                    <a id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        let input = document.querySelector('.search');
+        input.onkeyup = function() {
+            $.get('/friendssearch?q=' + input.value, function(data) {
+                document.querySelector('#results').innerHTML = data;
+            });
+        };
+
+    </script>
+{% endblock %}

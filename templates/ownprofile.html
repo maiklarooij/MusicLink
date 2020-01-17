@@ -1,11 +1,40 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register
+    Profile
 {% endblock %}
 
 {% block main %}
+    <h3 style="padding-bottom: 60px;">{{ gebruikersnaam }} <form id="login" action="/settings"><button class="btn btn-secondary" id="submit" type="submit">Edit profile</button></form></h3>
+    </p>
 
-<h3>{{ gebruikersnaam }}</h3>
+    <div style='float:left; width:30%' style="padding-bottom: 60px;">
+        <b>Most listened songs</b>
+        <ul class="list-group list-group-flush">
+            {% for nummer in top_tracks %}
+            <li class="list-group-item"><img src= {{ nummer[2] }} alt="nummer" width="35" height="35" align="left">{{ nummer[0] }} - {{ nummer[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div style='float:left; width:30%; margin-left:35px'>
+        <b>Most listened artists</b>
+        <ul class="list-group list-group-flush">
+            {% for artist in top_artists %}
+            <li class="list-group-item"><img src= {{ artist[1] }} alt="nummer" width="35" height="35" align="left">{{ artist[0] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style='float:left; width:30%; margin-left:35px'>
+        <b>Favorite genres</b>
+        <ul class="list-group list-group-flush">
+            {% for genre in genres %}
+            <li class="list-group-item">{{ genre }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="clear"></div>
+    </div>
 
 {% endblock %}
