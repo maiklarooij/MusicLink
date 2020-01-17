@@ -80,9 +80,9 @@ def callback():
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
 
-        profilepic = spotify.current_user()["images"][0]["url"]
+        # profilepic = spotify.current_user()["images"][0]["url"]
 
-        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
+        # db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
     else:
         return redirect("/register")
@@ -312,16 +312,17 @@ def changeusername():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
         username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])
+        print(username)
         # Ensure old password, new password and confirmation were submitted
         if not request.form.get("password") or not request.form.get("newusername"):
-            return apology("fill in all fields")
+            return apology("Fill in all fields")
 
         # Ensure that the old password is the same as currently stored in database
         elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("password")):
             return apology("Password wrong")
 
         # Ensure that old and new username are not the same
-        elif request.form.get("newusername") == username:
+        if request.form.get("newusername") == username[0]['username']:
             return apology("Choose a new username")
 
         # Update the users password
