@@ -57,7 +57,8 @@ def home():
             tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=userid)[0]['track3'])
             tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=userid)[0]['track4'])
             tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=userid)[0]['track5'])
-
+        print(tracks)
+        print(random.sample(tracks, 5))
         recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
         titles = []
         for recommendation in recommendations:
@@ -80,16 +81,15 @@ def callback():
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
 
-        profilepic = spotify.current_user()["images"][0]["url"]
+        # profilepic = spotify.current_user()["images"][0]["url"]
 
-        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
+        # db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
     else:
         return redirect("/register")
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -108,11 +108,11 @@ def register():
             spotify = spotipy.Spotify(auth=oauth)
 
             spotify_id = spotify.current_user()["id"]
-            profilepic = spotify.current_user()["images"][0]["url"]
+            # profilepic = spotify.current_user()["images"][0]["url"]
 
-            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
+            db.execute("INSERT INTO users (username, hash, spotifyid) VALUES (:username, :password, :spotifyid)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
 
             rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
@@ -197,6 +197,35 @@ def search():
 
     else:
         return render_template("search.html")
+
+@app.route("/playlist")
+@login_required
+def playlist():
+
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    update_database_top(spotify)
+
+    # take top 5 tracks
+    # take top 5 artists
+    tracks = []
+    artiesten = []
+    # tracks.append(db.execute("SELECT track1 FROM top WHERE userid = :userid", userid=session['user_id']))
+    # tracks.append(db.execute("SELECT track2 FROM top WHERE userid = :userid", userid=session['user_id']))
+    # tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=session['user_id']))
+    # tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=session['user_id']))
+    # tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=session['user_id']))
+    artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
+    for artist in artists[0]:
+        artiesten.append(artists[0][artist])
+    print(artiesten)
+    recommendations = spotify.recommendations(seed_artists=random.sample(artiesten, 5), limit=30)['tracks']
+    titles = []
+    for recommendation in recommendations:
+        titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
+    # create
+    return render_template("playlist.html", titles=titles)
 
 @app.route("/logout")
 def logout():
