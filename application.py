@@ -111,15 +111,17 @@ def register():
             spotify = spotipy.Spotify(auth=oauth)
 
             spotify_id = spotify.current_user()["id"]
+
             profilepic = spotify.current_user()["images"]
             if len(profilepic) == 0:
                 profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
             else:
                 profilepic = profilepic[0]['url']
 
+
             db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
 
             rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
@@ -207,34 +209,54 @@ def logout():
 
     return redirect("/")
 
-@app.route('/ownprofile')
+@app.route('/ownprofile', methods=["GET", "POST"])
 @login_required
 def ownprofile():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])
-    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
+    term = request.form.get("type")
+
+
+    recenten = spotify.current_user_recently_played(limit=7)['items']
+    print(recenten)
+    top_artists = spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]
+    top_tracks = spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]
+    top_artists = [artist["id"] for artist in top_artists]
+    top_tracks = [track["id"] for track in top_tracks]
+
     top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])
+
+    # recent = []
+    # for nummer in recenten:
+    #     liedje = spotify.track(nummer['items'][0]['track']['album']['id'])
+    #     print(liedje)
+    #     recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
 
     genres = []
     for genre in top_genres[0]:
         genres.append(top_genres[0][genre])
 
     artists = []
-    for artist in top_artists[0]:
-        artiest = spotify.artist(top_artists[0][artist])
+    for artist in top_artists:
+        artiest = spotify.artist(artist)
         artists.append((artiest['name'], artiest['images'][0]['url']))
 
     nummer_artiest = []
-    for liedje in top_tracks[0]:
-        nummer = spotify.track(top_tracks[0][liedje])
+    for liedje in top_tracks:
+        nummer = spotify.track(liedje)
         nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
-    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
-    return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], top_tracks=nummer_artiest, top_artists=artists, genres=genres, profilepic=profilepic)
 
+    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
+
+    if request.method == "GET":
+        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze='short_term', profilepic=profilepic)
+    elif request.method == "POST":
+        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze=term, profilepic=profilepic)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
