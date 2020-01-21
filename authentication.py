@@ -8,7 +8,7 @@ CLIENT_SECRET = "80dd7e7676fb4a8ca76cedf2e417b57e"
 
 #Port and callback url can be changed or ledt to localhost:5000
 
-redirect_uri = "https://c441fee4-10c6-40b4-80b8-5e535e66d368-ide.cs50.xyz:8080/callback"
+redirect_uri = "https://4159dc31-c71b-4bb9-acfc-6c04c02e08a9-ide.cs50.xyz:8080/callback"
 
 #Add needed scope from spotify user
 SCOPE = "streaming user-read-email user-read-private user-read-currently-playing user-read-recently-played user-top-read"
