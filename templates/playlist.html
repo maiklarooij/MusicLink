@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Playlist
+{% endblock %}
+
+{% block main %}
+<div id = "alert_placeholder"></div>
+ <div>
+     <div>
+        <h3>Your personal playlist</h3>
+        </div>
+        <div class="button-right">
+            <form action="/playlist" method="post" id="form">
+                <input type="image" src="static/spotify_add.png" alt="Submit Form" style="width:50%;height:50%;"/>'
+            </form>
+        </div>
+        <h5>30 songs we recommend based on your top 5 artists</h5>
+        <ul class="list-group list-group-flush">
+            {% for nummer in titles %}
+            <li class="list-group-item"><img src= {{ nummer['img'] }} alt="nummer" width="35" height="35" align="left">{{ nummer['name'] }} - {% for artist in nummer['artists'] %}  {{ artist }}{% if ((nummer['artists'] | length > 1) and (artist != nummer['artists'][-1])) %}, {% endif %} {% endfor %}</li>
+            {% endfor %}
+
+        </ul>
+    </div>
+<script>
+
+bootstrap_alert = function() {}
+bootstrap_alert.warning = function(message) {
+            $('#alert_placeholder').html('<div class="alert alert-success"><a class="close" data-dismiss="alert"></a><span>'+message+'</span></div>')
+        }
+
+$('#button').on('click', function() {
+            bootstrap_alert.warning('Added to spotify!');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Change username
+{% endblock %}
+
+{% block main %}
+
+    <form id="register" action="/changeusername" method="post">
+        <div class="form-group">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="newusername" name="newusername" placeholder="New username">
+        </div>
+        <button class="btn btn-primary" id="submit" type="submit">Change</button>
+    </form>
+
+{% endblock %}

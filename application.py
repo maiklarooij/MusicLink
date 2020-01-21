@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from collections import Counter
 
+from datetime import datetime
 import random
 import spotipy
 import authentication
@@ -171,6 +172,7 @@ def login():
 @login_required
 def search():
     if request.method == "POST":
+
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
         artists = []
@@ -198,7 +200,7 @@ def search():
     else:
         return render_template("search.html")
 
-@app.route("/playlist")
+@app.route("/playlist", methods=["GET","POST"])
 @login_required
 def playlist():
 
@@ -211,20 +213,28 @@ def playlist():
     # take top 5 artists
     tracks = []
     artiesten = []
-    # tracks.append(db.execute("SELECT track1 FROM top WHERE userid = :userid", userid=session['user_id']))
-    # tracks.append(db.execute("SELECT track2 FROM top WHERE userid = :userid", userid=session['user_id']))
-    # tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=session['user_id']))
-    # tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=session['user_id']))
-    # tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=session['user_id']))
+    songs = []
     artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
     for artist in artists[0]:
         artiesten.append(artists[0][artist])
-    print(artiesten)
     recommendations = spotify.recommendations(seed_artists=random.sample(artiesten, 5), limit=30)['tracks']
     titles = []
     for recommendation in recommendations:
         titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
     # create
+    if request.method == "POST":
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+        spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
+        now = datetime.now() # current date and time
+        now = now.strftime("%m/%d/%Y_%H:%M:%S")
+        name = 'personal_playlist_'+ now
+        playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
+        for song in recommendations:
+            songs.append(song['uri'])
+        print(songs)
+        spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks='hi')
+        flash("Added to Spotify!")
     return render_template("playlist.html", titles=titles)
 
 @app.route("/logout")
@@ -266,10 +276,10 @@ def ownprofile():
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
-    users = [user["username"] for user in db.execute("SELECT username FROM users")]
-    users.remove(db.execute("SELECT username FROM users WHERE userid=:userid", userid=session['user_id'])[0]['username'])
+    users = [user for user in db.execute("SELECT username, profilepic FROM users")]
+    users.remove(db.execute("SELECT username, profilepic FROM users WHERE userid=:userid", userid=session['user_id'])[0])
     q = request.args.get("q")
-    results = [user for user in users if q if user.upper().startswith(q.upper())]
+    results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
     return render_template("friendssearch.html", results=results)
 
 @app.route('/friends', methods=["GET"])
@@ -285,6 +295,7 @@ def friends():
 @login_required
 def follow():
     username = request.form.get('follow')
+    print(username)
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
@@ -292,9 +303,77 @@ def follow():
     else:
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
         flash(f"Successfully unfollowed {username}!")
+
+
     return redirect("/home")
 
 @app.route('/settings')
 @login_required
 def settings():
     return render_template("settings.html")
+
+@app.route("/changepassword", methods=["GET", "POST"])
+@login_required
+def changepassword():
+    """Let's the user change the password"""
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure old password, new password and confirmation were submitted
+        if not request.form.get("oldpass") or not request.form.get("newpass") or not request.form.get("confirmation"):
+            return apology("fill in all fields")
+
+        # Ensure that the old password is the same as currently stored in database
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("oldpass")):
+            return apology("old password wrong")
+
+        # Ensure that old and new password are not the same
+        elif request.form.get("oldpass") == request.form.get("newpass"):
+            return apology("choose a new password")
+
+        # Ensure that new password and confirmation match
+        elif request.form.get("newpass") != request.form.get("confirmation"):
+            return apology("the passwords do not match")
+
+        # Update the users password
+        db.execute("UPDATE users SET hash = :password", password=generate_password_hash(request.form.get("newpass")))
+
+        # Redirect user to home page
+        return redirect("/ownprofile")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("changepassword.html")
+
+@app.route("/changeusername", methods=["GET", "POST"])
+@login_required
+def changeusername():
+    """Let's the user change the username"""
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])
+        print(username)
+        # Ensure old password, new password and confirmation were submitted
+        if not request.form.get("password") or not request.form.get("newusername"):
+            return apology("Fill in all fields")
+
+        # Ensure that the old password is the same as currently stored in database
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("password")):
+            return apology("Password wrong")
+
+        # Ensure that old and new username are not the same
+        if request.form.get("newusername") == username[0]['username']:
+            return apology("Choose a new username")
+
+        # Update the users password
+        db.execute("UPDATE users SET username = :username WHERE userid = :userid", username=request.form.get("newusername"), userid=session["user_id"])
+
+        # Redirect user to home page
+        return redirect("/ownprofile")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    elif request.method == "GET":
+        return render_template("changeusername.html")
+
