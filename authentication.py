@@ -6,7 +6,6 @@ CLIENT_ID = "e351ac3d72594cad83fa632150e602df"
 #aDD YOUR CLIENT SECRET FROM SPOTIFY
 CLIENT_SECRET = "80dd7e7676fb4a8ca76cedf2e417b57e"
 
-#Port and callback url can be changed or ledt to localhost:5000
 
 redirect_uri = "https://4159dc31-c71b-4bb9-acfc-6c04c02e08a9-ide.cs50.xyz:8080/callback"
 

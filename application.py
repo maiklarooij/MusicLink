@@ -175,6 +175,7 @@ def login():
 @login_required
 def search():
     if request.method == "POST":
+
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
         artists = []
@@ -259,10 +260,10 @@ def ownprofile():
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
-    users = [user["username"] for user in db.execute("SELECT username FROM users")]
-    users.remove(db.execute("SELECT username FROM users WHERE userid=:userid", userid=session['user_id'])[0]['username'])
+    users = [user for user in db.execute("SELECT username, profilepic FROM users")]
+    users.remove(db.execute("SELECT username, profilepic FROM users WHERE userid=:userid", userid=session['user_id'])[0])
     q = request.args.get("q")
-    results = [user for user in users if q if user.upper().startswith(q.upper())]
+    results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
     return render_template("friendssearch.html", results=results)
 
 @app.route('/friends', methods=["GET"])
@@ -285,6 +286,8 @@ def follow():
     else:
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
         flash(f"Successfully unfollowed {username}!")
+
+
     return redirect("/home")
 
 @app.route('/settings')
@@ -356,3 +359,4 @@ def changeusername():
     # User reached route via GET (as by clicking a link or via redirect)
     elif request.method == "GET":
         return render_template("changeusername.html")
+
