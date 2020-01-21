@@ -1,26 +1,10 @@
-{% extends "layout.html" %}
+{{ searchtype }}
+{{ results }}
 
-{% block title %}
-    Results
-{% endblock %}
-
-{% block main %}
-    <form action="/search" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="Search for..." type="text">
-            <select class="form-control" name="type">
-                <option value="track">Tracks</option>
-                <option value="artist">Artists</option>
-                <option value="album">Albums</option>
-            </select>
-        </div>
-        <button class="btn btn-outline-primary" type="submit">Search</button>
-    </form>
-
-    <table class="table table-hover table-striped ">
+    <table>
 
     <!---Track Results--->
-    {% if track_result|length > 0 %}
+    {% if searchtype == 'track' %}
          <thead>
             <tr>
                 <th scope="col">Title</th>
@@ -33,14 +17,14 @@
         </thead>
         <tbody>
             <tr>
-            {% for track in track_result['tracks']['items'] %}
+            {% for track in results['tracks']['items'] %}
                 <td>{{ track['name'] }}</td>
                 <!---artist--->
                 <td>{{ track['album']['artists'][0]['name'] }}</td>
                 <td>{{ track['album']['name'] }}</td>
                 <td> {{ track['duration_ms'] }} </td>
                 <!---photo--->
-                <!--<td><img src= "{{ track['album']['images'][0]['url'] }}" width='100px' height='100px'/></td>-->
+                <td><img src= "{{ track['album']['images'][0]['url'] }}" width='100px' height='100px'/></td>
 
                 <!---spotify link--->
                 <td><a href='{{ track['external_urls']['spotify'] }}'>Open in spotify</a></td>
@@ -48,9 +32,8 @@
             {% endfor %}
         </tbody>
 
-    {{ artist_result }}
     <!---artist results--->
-    {% elif artist_result|length > 0 %}
+    {% elif searchtype == 'artist' %}
         <thead>
 
             <tr>
@@ -62,7 +45,7 @@
         </thead>
          <tbody>
             <tr>
-            {% for artist in artist_result['artists']['items'] %}
+            {% for artist in results['artists']['items'] %}
 
                 <!--{% if artist['images'] | length > 0 %}-->
                 <td><img src= "{{ artist['images'][0]['url'] }}"  width='80px' height='80px'/></td>
@@ -75,7 +58,7 @@
          </tbody>
 
     <!--album results-->
-    {% elif album_result|length > 0 %}
+    {% elif searchtype == 'album' %}
 
     <thead>
             <tr>
@@ -87,11 +70,11 @@
             </tr>
     </thead>
         <tbody>
-            {% for result in album_result['albums']['items'] %}
+            {% for album in results['albums']['items'] %}
             <tr>
             <td><img src= "{{ result['images'][0]['url'] }}" width='100px' height='100px'/></td>
-            <td>{{ result['name'] }}</td>
-            <td>{{ result['artists'][0]['name'] }}</td>
+            <td>{{ album['name'] }}</td>
+            <td>{{ album['artists'][0]['name'] }}</td>
             <td><a href='{{ result['external_urls']['spotify'] }}'>Open in spotify</a></td>
             </tr>
             {% endfor %}
@@ -99,5 +82,3 @@
         </tbody>
     {% endif %}
     </table>
-
-{% endblock %}

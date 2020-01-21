@@ -11,6 +11,10 @@
             <h2>Recommendations based on what your friends listen!</h2>
             {% if not titles %}
                 You are not following anyone! Start following users to get recommendations based on what they listen!
+                <p></p>
+                <form method="get" action="/friends">
+                    <button class="btn btn-primary" type="submit">Find friends!</button>
+                </form>
             {% endif %}
             {% for title in titles %}
             <a href="{{ title['link'] }}">
