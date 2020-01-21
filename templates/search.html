@@ -5,17 +5,16 @@
 {% endblock %}
 
 {% block main %}
-
-    <form action="/searched" method="post">
+    <form action="/search" method="post">
         <div class="form-group">
-            <input autocomplete="off" autofocus placeholder="Search for..." type="text" name="search">
+            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="Search for..." type="text">
             <select class="form-control" name="type">
                 <option value="track">Tracks</option>
                 <option value="artist">Artists</option>
                 <option value="album">Albums</option>
             </select>
-            <button type='submit' class="btn btn-primary">Search</button>
         </div>
+        <button class="btn btn-outline-primary" type="submit">Search</button>
     </form>
 
 {% endblock %}
