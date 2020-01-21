@@ -3,12 +3,15 @@ import os
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
+from flask_jsglue import JSGlue
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from collections import Counter
+import json
 
+from datetime import datetime
 import random
 import spotipy
 import authentication
@@ -16,6 +19,7 @@ from helpers import login_required, apology, update_database_top
 
 # Configure application
 app = Flask(__name__)
+jsglue = JSGlue(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -57,7 +61,8 @@ def home():
             tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=userid)[0]['track3'])
             tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=userid)[0]['track4'])
             tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=userid)[0]['track5'])
-
+        print(tracks)
+        print(random.sample(tracks, 5))
         recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
         titles = []
         for recommendation in recommendations:
@@ -80,16 +85,15 @@ def callback():
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
 
-        # profilepic = spotify.current_user()["images"][0]["url"]
+        profilepic = spotify.current_user()["images"][0]["url"]
 
-        # db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
+        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
     else:
         return redirect("/register")
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -108,13 +112,15 @@ def register():
             spotify = spotipy.Spotify(auth=oauth)
 
             spotify_id = spotify.current_user()["id"]
-            # profilepic = spotify.current_user()["images"][0]["url"]
 
-            # db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
-            #             username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-            #             method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
+            profilepic = spotify.current_user()["images"]
+            if len(profilepic) == 0:
+                profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
+            else:
+                profilepic = profilepic[0]['url']
 
-            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
+
+            db.execute("INSERT INTO users (username, hash, spotifyid) VALUES (:username, :password, :spotifyid)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
                         method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
 
@@ -171,37 +177,67 @@ def login():
         return render_template("login.html")
 
 
+@app.route('/searched', methods=["GET", "POST"])
+@login_required
+def searched():
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+
+        q = request.form.get('search')
+        searchtype = request.form.get('type')
+
+        results = []
+        if searchtype == 'track':
+            results = spotify.search(q='track:' + q, type=searchtype)
+        elif searchtype == "artist":
+            results = spotify.search(q='artist:' + q, type=searchtype)
+        elif searchtype == 'album':
+            results = spotify.search(q='album:' + q, type=searchtype)
+
+
+        return render_template("searched.html", results=results, searchtype=searchtype)
+
 @app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
-    if request.method == "POST":
+    return render_template("search.html")
 
+@app.route("/playlist", methods=["GET","POST"])
+@login_required
+def playlist():
+
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    update_database_top(spotify)
+
+    # take top 5 tracks
+    # take top 5 artists
+    tracks = []
+    artiesten = []
+    songs = []
+    artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
+    for artist in artists[0]:
+        artiesten.append(artists[0][artist])
+    recommendations = spotify.recommendations(seed_artists=random.sample(artiesten, 5), limit=30)['tracks']
+    titles = []
+    for recommendation in recommendations:
+        titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
+    # create
+    if request.method == "POST":
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
-        artists = []
-        pictures = []
-        track_result = dict()
-        album_result = dict()
-        artist_result = dict()
-        duration = []
-        input = request.form.get("search")
-        searchtype = request.form.get("type")
-        if searchtype == 'track':
-            track_result = spotify.search(q='track:' + input, type=searchtype)
-        elif searchtype == "artist":
-            artist_result = spotify.search(q='artist:' + input, type=searchtype)
-        elif searchtype == 'album':
-            album_result = spotify.search(q='album:' + input, type=searchtype)
-        if not artist_result:
-            if not track_result:
-                if not album_result:
-                    return apology("No results", 404)
-
-        return render_template("searched.html", track_result=track_result, artist_result=artist_result,
-                                album_result=album_result, pictures=pictures, duration=duration)
-
-    else:
-        return render_template("search.html")
+        spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
+        now = datetime.now() # current date and time
+        now = now.strftime("%m/%d/%Y_%H:%M:%S")
+        name = 'personal_playlist_'+ now
+        playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
+        for song in recommendations:
+            songs.append(song['uri'])
+        print(songs)
+        spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks='hi')
+        flash("Added to Spotify!")
+    return render_template("playlist.html", titles=titles)
 
 @app.route("/logout")
 def logout():
@@ -250,12 +286,15 @@ def ownprofile():
         nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
+
+    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
+
     if request.method == "GET":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze='short_term')
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze='short_term', profilepic=profilepic)
     elif request.method == "POST":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze=term)
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze=term, profilepic=profilepic)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
@@ -272,13 +311,29 @@ def friends():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    user = spotify.user("1127911071")['images'][0]['url']
-    return render_template("friends.html", user=user)
+    genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
+    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
+    following = [user['followeduserid'] for user in following]
+
+    samegenreusers = db.execute("SELECT userid, genre1, genre2, genre3 FROM top WHERE genre1 = :genre1 OR genre2 = :genre1 OR genre3 = :genre1 OR genre1 = :genre2 OR genre2 = :genre2 OR genre3 = :genre2 OR genre1 = :genre3 or genre2 = :genre3 OR genre3 = :genre3",
+                    genre1=genres[0]['genre1'], genre2=genres[0]['genre2'], genre3=genres[0]['genre3'])
+
+    samegenreusers = [user for user in samegenreusers if user['userid'] != session["user_id"]]
+    samegenreusers = [user for user in samegenreusers if user['userid'] not in following]
+
+    for user in samegenreusers:
+        user['name'] = db.execute("SELECT username FROM users WHERE userid = :userid", userid=user['userid'])[0]['username']
+        user['img'] = db.execute("SELECT profilepic FROM users WHERE userid = :userid", userid=user['userid'])[0]['profilepic']
+
+    if len(samegenreusers) > 3:
+        samegenreusers = random.sample(samegenreusers, 3)
+    return render_template("friends.html", users=samegenreusers)
 
 @app.route('/follow', methods=["POST"])
 @login_required
 def follow():
     username = request.form.get('follow')
+    print(username)
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
