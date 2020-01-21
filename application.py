@@ -3,7 +3,6 @@ import os
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
-from flask_jsglue import JSGlue
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -19,7 +18,6 @@ from helpers import login_required, apology, update_database_top
 
 # Configure application
 app = Flask(__name__)
-jsglue = JSGlue(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -85,10 +83,15 @@ def callback():
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
 
-        profilepic = spotify.current_user()["images"][0]["url"]
+        profilepic = spotify.current_user()["images"]
+        if len(profilepic) == 0:
+            profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
+        else:
+            profilepic = profilepic[0]['url']
 
         db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
+
     else:
         return redirect("/register")
 
@@ -177,30 +180,37 @@ def login():
         return render_template("login.html")
 
 
-@app.route('/searched', methods=["GET", "POST"])
-@login_required
-def searched():
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
-
-        q = request.form.get('search')
-        searchtype = request.form.get('type')
-
-        results = []
-        if searchtype == 'track':
-            results = spotify.search(q='track:' + q, type=searchtype)
-        elif searchtype == "artist":
-            results = spotify.search(q='artist:' + q, type=searchtype)
-        elif searchtype == 'album':
-            results = spotify.search(q='album:' + q, type=searchtype)
-
-
-        return render_template("searched.html", results=results, searchtype=searchtype)
-
 @app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
-    return render_template("search.html")
+    if request.method == "POST":
+
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+        artists = []
+        pictures = []
+        track_result = dict()
+        album_result = dict()
+        artist_result = dict()
+        duration = []
+        input = request.form.get("search")
+        searchtype = request.form.get("type")
+        if searchtype == 'track':
+            track_result = spotify.search(q='track:' + input, type=searchtype)
+        elif searchtype == "artist":
+            artist_result = spotify.search(q='artist:' + input, type=searchtype)
+        elif searchtype == 'album':
+            album_result = spotify.search(q='album:' + input, type=searchtype)
+        if not artist_result:
+            if not track_result:
+                if not album_result:
+                    return apology("No results", 404)
+
+        return render_template("searched.html", track_result=track_result, artist_result=artist_result,
+                                album_result=album_result, pictures=pictures, duration=duration)
+
+    else:
+        return render_template("search.html")
 
 @app.route("/playlist", methods=["GET","POST"])
 @login_required
