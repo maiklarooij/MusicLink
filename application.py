@@ -317,10 +317,6 @@ def friendssearch():
 @app.route('/friends', methods=["GET"])
 @login_required
 def friends():
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
-
-
     genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
     following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
     following = [user['followeduserid'] for user in following]
