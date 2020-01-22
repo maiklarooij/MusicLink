@@ -338,10 +338,14 @@ def friends():
 @app.route('/follow', methods=["POST"])
 @login_required
 def follow():
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
     username = request.form.get('follow')
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
+        spotify.user_follow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
         flash(f"Successfully followed {username}!")
     else:
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
