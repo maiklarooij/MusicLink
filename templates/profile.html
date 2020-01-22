@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+
+    <div class="row">
+        <div class="col" style='float:left; width:30%' style="padding-bottom: 60px;">
+            <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
+            </p>
+            <h3 style="padding-bottom: 50px;">{{ gebruikersnaam }}
+            <div>
+                <form action="/follow" method="post">
+                    {% if userid in following %}
+                        <button type="submit" class="btn btn-success btn-sm" value="{{ gebruikersnaam }}" name='follow'>Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ gebruikersnaam }}" name='follow'>Follow</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    </p>
+       <div style='float:center; width:94%; margin-left:35px'>
+        <b>Favorite genres</b>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for genre in genres %}
+            <li class="list-group-item">{{ genre }}</li>
+            {% endfor %}
+        </ul>
+        </p>
+    </div>
+    </p>
+    <div style='float:left; width:45%' style="padding-bottom: 60px;">
+        <b>Most listened songs</b>
+        </p>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for nummer in top_tracks %}
+            <li class="list-group-item"><img src= {{ nummer[2] }} alt="nummer" width="35" height="35" align="left">{{ nummer[0] }} - {{ nummer[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div style='float:left; width:45%; margin-left:35px'>
+        <b>Most listened artists</b>
+        </p>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for artist in top_artists %}
+            <li class="list-group-item"><img src= {{ artist[1] }} alt="nummer" width="35" height="35" align="left">{{ artist[0] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="clear"></div>
+    </div>
+
+    <script>
+
+    </script>
+{% endblock %}

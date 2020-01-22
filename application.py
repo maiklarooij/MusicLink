@@ -190,7 +190,6 @@ def search():
 
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
-        artists = []
         pictures = []
         track_result = dict()
         album_result = dict()
@@ -223,17 +222,14 @@ def playlist():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    update_database_top(spotify)
-
     # take top 5 tracks
     # take top 5 artists
-    tracks = []
-    artiesten = []
     songs = []
-    artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
-    for artist in artists[0]:
-        artiesten.append(artists[0][artist])
-    recommendations = spotify.recommendations(seed_artists=random.sample(artiesten, 5), limit=30)['tracks']
+
+    artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+    tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+
+    recommendations = spotify.recommendations(seed_artists=random.sample(artists, 2), seed_tracks=random.sample(tracks, 3), limit=30)['tracks']
     titles = []
     for recommendation in recommendations:
         titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
@@ -266,11 +262,9 @@ def ownprofile():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    term = request.form.get("type")
+    term = request.form.get("term")
 
-
-    recenten = spotify.current_user_recently_played(limit=7)['items']
-    print(recenten)
+    recenten = spotify.current_user_recently_played(limit=6)['items']
     top_artists = spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]
     top_tracks = spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]
     top_artists = [artist["id"] for artist in top_artists]
@@ -278,11 +272,10 @@ def ownprofile():
 
     top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])
 
-    # recent = []
-    # for nummer in recenten:
-    #     liedje = spotify.track(nummer['items'][0]['track']['album']['id'])
-    #     print(liedje)
-    #     recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
+    recent = []
+    for nummer in recenten:
+        liedje = spotify.track(nummer['track']['id'])
+        recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
 
     genres = []
     for genre in top_genres[0]:
@@ -304,26 +297,25 @@ def ownprofile():
 
     if request.method == "GET":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze='short_term', profilepic=profilepic)
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
     elif request.method == "POST":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze=term, profilepic=profilepic)
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze=term, profilepic=profilepic)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
-    users = [user for user in db.execute("SELECT username, profilepic FROM users")]
-    users.remove(db.execute("SELECT username, profilepic FROM users WHERE userid=:userid", userid=session['user_id'])[0])
+    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
+    following = [user['followeduserid'] for user in following]
+    users = [user for user in db.execute("SELECT username, profilepic, userid FROM users")]
+    users.remove(db.execute("SELECT username, profilepic, userid FROM users WHERE userid=:userid", userid=session['user_id'])[0])
     q = request.args.get("q")
     results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
-    return render_template("friendssearch.html", results=results)
+    return render_template("friendssearch.html", results=results, following=following)
 
 @app.route('/friends', methods=["GET"])
 @login_required
 def friends():
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
-
     genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
     following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
     following = [user['followeduserid'] for user in following]
@@ -340,19 +332,23 @@ def friends():
 
     if len(samegenreusers) > 3:
         samegenreusers = random.sample(samegenreusers, 3)
-    return render_template("friends.html", users=samegenreusers)
+    return render_template("friends.html", users=samegenreusers, following=following)
 
 @app.route('/follow', methods=["POST"])
 @login_required
 def follow():
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
     username = request.form.get('follow')
-    print(username)
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
+        spotify.user_follow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
         flash(f"Successfully followed {username}!")
     else:
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
+        spotify.user_unfollow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
         flash(f"Successfully unfollowed {username}!")
 
 
@@ -429,6 +425,7 @@ def changeusername():
         return render_template("changeusername.html")
 
 
+
 @app.route("/share", methods=["GET", "POST"])
 @login_required
 def Share():
@@ -439,3 +436,40 @@ def Share():
         flash("Shared!")
         return redirect("/home")
     return render_template("share.html")
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    username = request.form.get("username")
+    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=username)[0]['userid']
+    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
+    following = [user['followeduserid'] for user in following]
+    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=userid)
+    top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=userid)
+    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=userid)
+
+    genres = []
+    for genre in top_genres[0]:
+        genres.append(top_genres[0][genre])
+
+    artists = []
+    for artist in top_artists[0]:
+        artiest = spotify.artist(top_artists[0][artist])
+        artists.append((artiest['name'], artiest['images'][0]['url']))
+
+    nummer_artiest = []
+    for liedje in top_tracks[0]:
+        nummer = spotify.track(top_tracks[0][liedje])
+        nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+
+    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
+
+    if request.method == "GET":
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
+    elif request.method == "POST":
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)

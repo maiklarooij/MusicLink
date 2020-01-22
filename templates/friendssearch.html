@@ -9,19 +9,30 @@
     </head>
     <body>
         {% for result in results %}
-            <div class="row" style="display: inline-block; margin-top: 30px">
-                <div class="col" style="width: 35px">
-                    <div class="center-cropped-small" style="background-image: url({{ result['profilepic'] }});"></div>
+            <div class="row flex" style="margin-top: 30px; align-items: center; width: 100%">
+                <div class="col-sm"></div>
+                <div class="col-">
+                    <form action="/profile" method="POST">
+                        <input type="image" src="{{ result['profilepic'] }}" class="center-cropped-small" value="{{ result['username'] }}" name='username'>
+                    </form>
                 </div>
-                <div class="col">
-                    {{ result['username'] }}
+                <div class="col-">
+                    <form action="/profile" method="POST">
+                        <input type="submit" class="btn default" value="{{ result['username'] }}" name='username' style="background-color: inherit; font-size: 20px; font-weight: bold">
+                    </form>
                 </div>
-            </div>
-            <div>
-                <form action="/follow" method="post">
-                <button type="submit" class="btn btn-success btn-sm" value="{{ result }}" name='follow'>(Un)Follow</button>
+                <div class="col-" style="display: table-cell; vertical-align: center;">
+                    <form action="/follow" method="post">
+                    {% if result['userid'] in following %}
+                        <button type="submit" class="btn btn-success btn-sm" value="{{ result['username'] }}" name='follow'>Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
+                    {% endif %}
                 </form>
+                </div>
+                <div class="col-sm"></div>
             </div>
+
         {% endfor %}
     </body>
 

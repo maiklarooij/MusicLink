@@ -11,7 +11,7 @@ redirect_uri = "https://c441fee4-10c6-40b4-80b8-5e535e66d368-ide.cs50.xyz:8080/c
 
 
 #Add needed scope from spotify user
-SCOPE = "streaming user-read-email user-read-private user-read-currently-playing user-read-recently-played user-top-read playlist-modify-public"
+SCOPE = "streaming user-read-email user-read-private user-read-currently-playing user-read-recently-played user-top-read playlist-modify-public user-follow-modify"
 #token_data will hold authentication header with access code, the allowed scopes, and the refresh countdown
 TOKEN_DATA = []
 
