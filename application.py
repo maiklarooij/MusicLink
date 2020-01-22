@@ -275,9 +275,8 @@ def ownprofile():
     recent = []
     for nummer in recenten:
         liedje = spotify.track(nummer['track']['id'])
-        print(liedje)
         recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
-    print(recent)
+
     genres = []
     for genre in top_genres[0]:
         genres.append(top_genres[0][genre])
@@ -423,4 +422,39 @@ def changeusername():
     # User reached route via GET (as by clicking a link or via redirect)
     elif request.method == "GET":
         return render_template("changeusername.html")
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    oauth = authentication.getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+
+    username = request.form.get("username")
+    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=username)
+    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=userid)
+    top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=userid)
+    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=userid)
+
+    genres = []
+    for genre in top_genres[0]:
+        genres.append(top_genres[0][genre])
+
+    artists = []
+    for artist in top_artists:
+        artiest = spotify.artist(artist)
+        artists.append((artiest['name'], artiest['images'][0]['url']))
+
+    nummer_artiest = []
+    for liedje in top_tracks:
+        nummer = spotify.track(liedje)
+        nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+
+    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
+
+    if request.method == "GET":
+        return render_template("profile.html", gebruikersnaam=username,
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, profilepic=profilepic)
+    elif request.method == "POST":
+        return render_template("profile.html", gebruikersnaam=username,
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, profilepic=profilepic)
 
