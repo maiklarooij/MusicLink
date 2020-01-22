@@ -263,7 +263,7 @@ def ownprofile():
     term = request.form.get("type")
 
 
-    recenten = spotify.current_user_recently_played(limit=7)['items']
+    recenten = spotify.current_user_recently_played(limit=6)['items']
     print(recenten)
     top_artists = spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]
     top_tracks = spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]
@@ -272,12 +272,12 @@ def ownprofile():
 
     top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])
 
-    # recent = []
-    # for nummer in recenten:
-    #     liedje = spotify.track(nummer['items'][0]['track']['album']['id'])
-    #     print(liedje)
-    #     recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
-
+    recent = []
+    for nummer in recenten:
+        liedje = spotify.track(nummer['track']['id'])
+        print(liedje)
+        recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
+    print(recent)
     genres = []
     for genre in top_genres[0]:
         genres.append(top_genres[0][genre])
@@ -298,10 +298,10 @@ def ownprofile():
 
     if request.method == "GET":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze='short_term', profilepic=profilepic)
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
     elif request.method == "POST":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recenten, keuze=term, profilepic=profilepic)
+        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze=term, profilepic=profilepic)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required

@@ -7,14 +7,13 @@
 {% block main %}
 
     <div class="row">
-        <div class="col">
+        <div class="col" style='float:left; width:30%' style="padding-bottom: 60px;">
             <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
-        </div>
-        <div class="col">
-            <h3 style="padding-bottom: 60px;">{{ gebruikersnaam }} <form action="/settings"><button class="btn btn-secondary" id="submit" type="submit">Edit profile</button></form></h3>
+            </p>
+            <h3 style="padding-bottom: 50px;">{{ gebruikersnaam }} <form action="/settings">
+            <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button></form></h3>
         </div>
     </div>
-
     <i><h4>From what period do you want to see your statistics?</h4></i>
     </p>
     <form action="/ownprofile" method="post">
