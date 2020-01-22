@@ -21,11 +21,11 @@
             {% for user in users %}
 
                 <div class="col-lg-4">
-                    <form action="/profile" method="GET">
+                    <form action="/profile" method="POST">
                         <input type="image" src="{{ user['img'] }}" class="center-cropped" value="{{ user['name'] }}" name='username'>
                     </form>
                     <p></p>
-                    <form action="/profile" method="GET">
+                    <form action="/profile" method="POST">
                         <input type="submit" class="btn default" value="{{ user['name'] }}" name='username' style="background-color: inherit; font-size: 30px; font-weight: bold">
                     </form>
                     <p>Listening mostly to: {{ user['genre1'] }}, {{ user['genre2'] }} and {{ user['genre3'] }}</p>

@@ -262,9 +262,7 @@ def ownprofile():
 
     term = request.form.get("type")
 
-
     recenten = spotify.current_user_recently_played(limit=6)['items']
-    print(recenten)
     top_artists = spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]
     top_tracks = spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]
     top_artists = [artist["id"] for artist in top_artists]
@@ -430,7 +428,9 @@ def profile():
     spotify = spotipy.Spotify(auth=oauth)
 
     username = request.form.get("username")
-    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=username)
+    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=username)[0]['userid']
+    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
+    following = [user['followeduserid'] for user in following]
     top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=userid)
     top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=userid)
     top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=userid)
@@ -440,21 +440,21 @@ def profile():
         genres.append(top_genres[0][genre])
 
     artists = []
-    for artist in top_artists:
-        artiest = spotify.artist(artist)
+    for artist in top_artists[0]:
+        artiest = spotify.artist(top_artists[0][artist])
         artists.append((artiest['name'], artiest['images'][0]['url']))
 
     nummer_artiest = []
-    for liedje in top_tracks:
-        nummer = spotify.track(liedje)
+    for liedje in top_tracks[0]:
+        nummer = spotify.track(top_tracks[0][liedje])
         nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
 
     if request.method == "GET":
-        return render_template("profile.html", gebruikersnaam=username,
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, profilepic=profilepic)
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
     elif request.method == "POST":
-        return render_template("profile.html", gebruikersnaam=username,
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, profilepic=profilepic)
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
 
