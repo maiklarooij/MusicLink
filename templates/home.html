@@ -6,7 +6,20 @@
 
 {% block main %}
     <div class="row">
-        <div class="col-sm-8">hoi</div>
+        <div class="col-sm-8"><h3>Feed</h3>
+        {% for data in shared %}
+        <ul class="list-group">
+            {% if data | length > 1 %}
+            {% for mydata in data %}
+            <li class="list-group-item"><b>{{ mydata['username'] }}:</b> {{ mydata['value'] }}  {{ mydata['time'] }}</li>
+            {% endfor %}
+            {% else %}
+            <li class="list-group-item"><b>{{ data[0]['username'] }}:</b> {{ data[0]['value'] }}  {{ data[0]['time'] }}</li>
+            {% endif %}
+        </ul>
+        {% endfor %}
+
+        </div>
         <div class="col-sm-4">
             <h2>Recommendations based on what your friends listen!</h2>
             {% if not titles %}

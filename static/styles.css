@@ -83,3 +83,14 @@ display: inline-block;
 
 float: right;
 }
+/*.backgroundz{*/
+/*    background-image: url("musical.jpg");*/
+/*    background-repeat: no-repeat;*/
+/*      background-size: 100% 100%;*/
+input {
+    width: 800px;
+    height: 100px;
+}
+::-webkit-textarea-placeholder {
+   text-align: center;
+}

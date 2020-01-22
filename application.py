@@ -59,14 +59,17 @@ def home():
             tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=userid)[0]['track3'])
             tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=userid)[0]['track4'])
             tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=userid)[0]['track5'])
-        print(tracks)
-        print(random.sample(tracks, 5))
+
         recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
         titles = []
         for recommendation in recommendations:
             titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
-
-        return render_template("home.html", titles=titles)
+        shared_data =[]
+        for followed in followinglist:
+            shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:userid", userid=followed['followeduserid']))
+        shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:myid", myid=session['user_id']))
+        print(shared_data)
+        return render_template("home.html", titles=titles, shared=shared_data)
 
     return render_template("home.html")
 
@@ -197,6 +200,7 @@ def search():
         searchtype = request.form.get("type")
         if searchtype == 'track':
             track_result = spotify.search(q='track:' + input, type=searchtype)
+            print("search")
         elif searchtype == "artist":
             artist_result = spotify.search(q='artist:' + input, type=searchtype)
         elif searchtype == 'album':
@@ -239,13 +243,12 @@ def playlist():
         spotify = spotipy.Spotify(auth=oauth)
         spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
         now = datetime.now() # current date and time
-        now = now.strftime("%m/%d/%Y_%H:%M:%S")
-        name = 'personal_playlist_'+ now
+        now = now.strftime("%m/%d_%H:%M")
+        name = 'MusicLink_'+ now
         playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
         for song in recommendations:
             songs.append(song['uri'])
-        print(songs)
-        spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks='hi')
+        spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=songs)
         flash("Added to Spotify!")
     return render_template("playlist.html", titles=titles)
 
@@ -425,3 +428,14 @@ def changeusername():
     elif request.method == "GET":
         return render_template("changeusername.html")
 
+
+@app.route("/share", methods=["GET", "POST"])
+@login_required
+def Share():
+    if request.method == 'POST':
+        value = request.form.get("sharedtext")
+        username = db.execute("SELECT username FROM users WHERE userid = ?", session["user_id"])[0]['username']
+        db.execute("INSERT into shared (userid, value, username) VALUES (:userid, :value, :username)", userid=session["user_id"], value=value, username=username)
+        flash("Shared!")
+        return redirect("/home")
+    return render_template("share.html")
