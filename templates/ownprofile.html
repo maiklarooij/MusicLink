@@ -6,23 +6,37 @@
 
 {% block main %}
 
-    <div class="row">
-        <div class="col" style='float:left; width:30%' style="padding-bottom: 60px;">
+    <div class="row flex" style="align-items: center">
+        <div class="col-sm"></div>
+        <div class="col-" style="padding: 10px">
             <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
-            </p>
-            <h3 style="padding-bottom: 50px;">{{ gebruikersnaam }} <form action="/settings">
-            <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button></form></h3>
         </div>
+        <div class="col-" style="padding: 10px">
+            <h3>{{ gebruikersnaam }}</h3>
+            <form action="/settings">
+                <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button>
+            </form>
+        </div>
+        <div class="col-sm"></div>
     </div>
     <i><h4>From what period do you want to see your statistics?</h4></i>
     </p>
     <form action="/ownprofile" method="post">
         <div class="form-group">
-            <select class="form-control" name="type" onchange="this.form.submit();">
-                <option value="gekozen" selected disabled>{{ keuze }}</option>
-                <option>short_term</option>
-                <option value="medium_term">medium_term</option>
-                <option value="long_term">long_term</option>
+            <select class="form-control" name="term" onchange="this.form.submit();">
+                {% if keuze == "short_term" %}
+                    <option value="short_term" selected>Last month</option>
+                    <option value="medium_term">Last half year</option>
+                    <option value="long_term">All time</option>
+                {% elif keuze == "medium_term" %}
+                    <option value="short_term">Last month</option>
+                    <option value="medium_term" selected>Last half year</option>
+                    <option value="long_term">All time</option>
+                {% else %}
+                    <option value="short_term">Last month</option>
+                    <option value="medium_term">Last half year</option>
+                    <option value="long_term" selected>All time</option>
+                {% endif %}
             </select>
         </div>
     </form>

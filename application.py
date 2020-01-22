@@ -187,7 +187,6 @@ def search():
 
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
-        artists = []
         pictures = []
         track_result = dict()
         album_result = dict()
@@ -260,7 +259,7 @@ def ownprofile():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    term = request.form.get("type")
+    term = request.form.get("term")
 
 
     recenten = spotify.current_user_recently_played(limit=6)['items']
@@ -349,6 +348,7 @@ def follow():
         flash(f"Successfully followed {username}!")
     else:
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
+        spotify.user_unfollow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
         flash(f"Successfully unfollowed {username}!")
 
 
