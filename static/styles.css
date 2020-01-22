@@ -94,3 +94,25 @@ input {
 ::-webkit-textarea-placeholder {
    text-align: center;
 }
+.feed-username{
+    font-size:20px;
+}
+.feed-comment{
+    font-style:italic;
+}
+.feed-time{
+    text-align:right;
+}
+.feed-container{
+    display: inline-block;
+
+}
+.col-sm-8{
+    outline: 2px solid black;
+}
+#feedhead{
+        font-family: papyrus;
+}
+.feed-individual{
+      outline: 1px dotted grey;
+}
