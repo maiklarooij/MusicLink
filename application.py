@@ -219,17 +219,14 @@ def playlist():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    update_database_top(spotify)
-
     # take top 5 tracks
     # take top 5 artists
-    tracks = []
-    artiesten = []
     songs = []
-    artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])
-    for artist in artists[0]:
-        artiesten.append(artists[0][artist])
-    recommendations = spotify.recommendations(seed_artists=random.sample(artiesten, 5), limit=30)['tracks']
+
+    artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+    tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+
+    recommendations = spotify.recommendations(seed_artists=random.sample(artists, 2), seed_tracks=random.sample(tracks, 3), limit=30)['tracks']
     titles = []
     for recommendation in recommendations:
         titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
@@ -309,17 +306,20 @@ def ownprofile():
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
-    users = [user for user in db.execute("SELECT username, profilepic FROM users")]
-    users.remove(db.execute("SELECT username, profilepic FROM users WHERE userid=:userid", userid=session['user_id'])[0])
+    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
+    following = [user['followeduserid'] for user in following]
+    users = [user for user in db.execute("SELECT username, profilepic, userid FROM users")]
+    users.remove(db.execute("SELECT username, profilepic, userid FROM users WHERE userid=:userid", userid=session['user_id'])[0])
     q = request.args.get("q")
     results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
-    return render_template("friendssearch.html", results=results)
+    return render_template("friendssearch.html", results=results, following=following)
 
 @app.route('/friends', methods=["GET"])
 @login_required
 def friends():
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
+
 
     genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
     following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
@@ -337,13 +337,12 @@ def friends():
 
     if len(samegenreusers) > 3:
         samegenreusers = random.sample(samegenreusers, 3)
-    return render_template("friends.html", users=samegenreusers)
+    return render_template("friends.html", users=samegenreusers, following=following)
 
 @app.route('/follow', methods=["POST"])
 @login_required
 def follow():
     username = request.form.get('follow')
-    print(username)
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)

@@ -6,23 +6,23 @@
 
 {% block main %}
 <div id = "alert_placeholder"></div>
- <div>
-     <div>
-        <h3>Your personal playlist</h3>
+     <div class="row">
+        <div class="col">
+            <h3>Your personal playlist</h3>
         </div>
-        <div class="button-right">
+        <div class="button-right" class="col">
             <form action="/playlist" method="post" id="form">
-                <input type="image" src="static/spotify_add.png" alt="Submit Form" style="width:50%;height:50%;"/>'
+                <button class="btn btn-primary" type="submit">Add to Spotify</button>
             </form>
         </div>
-        <h5>30 songs we recommend based on your top 5 artists</h5>
+    </div>
+        <h5>We just generated a brand new playlist just for you!</h5>
         <ul class="list-group list-group-flush">
             {% for nummer in titles %}
-            <li class="list-group-item"><img src= {{ nummer['img'] }} alt="nummer" width="35" height="35" align="left">{{ nummer['name'] }} - {% for artist in nummer['artists'] %}  {{ artist }}{% if ((nummer['artists'] | length > 1) and (artist != nummer['artists'][-1])) %}, {% endif %} {% endfor %}</li>
+                <li class="list-group-item"><img src= "{{ nummer['img'] }}" alt="nummer" width="35" height="35" align="left"><a href="{{ nummer['link'] }}">{{ nummer['name'] }} - {% for artist in nummer['artists'] %}  {{ artist }}{% if ((nummer['artists'] | length > 1) and (artist != nummer['artists'][-1])) %}, {% endif %} {% endfor %}</a></li>
             {% endfor %}
 
         </ul>
-    </div>
 <script>
 
 bootstrap_alert = function() {}

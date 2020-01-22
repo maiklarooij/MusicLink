@@ -39,7 +39,18 @@ def login_required(f):
 def update_database_top(spotify):
 
     top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='short_term')["items"]
+
+    if len(top_artists) < 5:
+        top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='medium_term')["items"]
+        if len(top_artists) < 5:
+            top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='long_term')["items"]
+
     top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='short_term')["items"]
+
+    if len(top_tracks) < 5:
+        top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='medium_term')["items"]
+        if len(top_tracks) < 5:
+            top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='long_term')["items"]
 
     genrelists = [artist["genres"] for artist in top_artists]
     genres = []

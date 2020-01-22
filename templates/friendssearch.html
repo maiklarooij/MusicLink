@@ -19,7 +19,11 @@
             </div>
             <div>
                 <form action="/follow" method="post">
-                <button type="submit" class="btn btn-success btn-sm" value="{{ result }}" name='follow'>(Un)Follow</button>
+                    {% if result['userid'] in following %}
+                        <button type="submit" class="btn btn-success btn-sm" value="{{ result['username'] }}" name='follow'>Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
+                    {% endif %}
                 </form>
             </div>
         {% endfor %}

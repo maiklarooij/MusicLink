@@ -26,7 +26,9 @@
                     <h2>{{ user['name'] }}</h2>
                     <p>Listening mostly to: {{ user['genre1'] }}, {{ user['genre2'] }} and {{ user['genre3'] }}</p>
                     <p>
-                        <button id="followbutton" class="btn btn-primary" role="button" onclick="Follow()">Follow</button>
+                    <form action="/follow" method="post">
+                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ user['name'] }}" name='follow'>Follow</button>
+                    </form>
                     </p>
                 </div>
 
