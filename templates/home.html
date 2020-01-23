@@ -7,39 +7,19 @@
 {% block main %}
     <div class="row">
         <div class="col-sm-8"><h2 id='feed-head'>Feed</h2>
-        {% for data in shared %}
-
-        <!--<ul class="list-group">-->
-            {% if data | length > 1 %}
-            {% for mydata in data %}
+        {% for message in feed %}
             <div class=feed-individual>
             <div class="feed-username">
-                <b>{{ mydata['username'] }}:</b>
+                <b>{{ message['username'] }}:</b>
                 <div class="feed-comment">
-                    {{ mydata['value'] }}
+                    {{ message['value'] }}
                 </div>
                 <div class="feed-time">
-                    {{ mydata['time'] }}
+                    {{ message['time'] }}
                 </div>
 
             </div>
             </div>
-            {% endfor %}
-            {% else %}
-            <div class=feed-individual>
-            <div class="feed-username">
-                <b>{{ data[0]['username'] }}:</b>
-                <div class="feed-comment">
-                    {{ data[0]['value'] }}
-                </div>
-                <div class="feed-time">
-                    {{ data[0]['time'] }}
-                </div>
-
-            </div>
-            </div>
-            {% endif %}
-
         {% endfor %}
 
         </div>

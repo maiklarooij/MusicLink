@@ -64,14 +64,17 @@ def home():
         titles = []
         for recommendation in recommendations:
             titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
-        shared_data =[]
-        for followed in followinglist:
-            shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:userid", userid=followed['followeduserid']))
-        shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:myid", myid=session['user_id']))
-        for data in shared_data:
-            data.sort(key=lambda data:data['time'], reverse=True)
-        print(shared_data)
-        return render_template("home.html", titles=titles, shared=shared_data)
+
+        following.append(session["user_id"])
+
+        messages = db.execute("SELECT * FROM shared")
+        feed = []
+        for message in messages:
+            if message['userid'] in following:
+                feed.append(message)
+        feed = sorted(feed, key=lambda x: x['time'], reverse=True)
+
+        return render_template("home.html", titles=titles, feed=feed)
 
     return render_template("home.html")
 
