@@ -286,10 +286,10 @@ def ownprofile():
         artiest = spotify.artist(artist)
         artists.append((artiest['name'], artiest['images'][0]['url']))
 
-    nummer_artiest = []
+    top_artists = []
     for liedje in top_tracks:
         nummer = spotify.track(liedje)
-        nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+        top_artists.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
 
@@ -297,10 +297,10 @@ def ownprofile():
 
     if request.method == "GET":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
+        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
     elif request.method == "POST":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze=term, profilepic=profilepic)
+        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze=term, profilepic=profilepic)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
@@ -460,16 +460,16 @@ def profile():
         artiest = spotify.artist(top_artists[0][artist])
         artists.append((artiest['name'], artiest['images'][0]['url']))
 
-    nummer_artiest = []
+    top_artists = []
     for liedje in top_tracks[0]:
         nummer = spotify.track(top_tracks[0][liedje])
-        nummer_artiest.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+        top_artists.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
 
     if request.method == "GET":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=top_artists,
         top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
     elif request.method == "POST":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=nummer_artiest,
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=top_artists,
         top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
