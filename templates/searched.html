@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Results
+    Searched
 {% endblock %}
 
 {% block main %}
@@ -28,7 +28,7 @@
                 <th scope="col">Album</th>
                 <th scope="col">Length</th>
                 <th scope="col">Spotify Link</th>
-
+                <th scope="col">Share on Feed</th>
             </tr>
         </thead>
         <tbody>
@@ -44,11 +44,25 @@
 
                 <!---spotify link--->
                 <td><a href='{{ track['external_urls']['spotify'] }}'>Open in spotify</a></td>
+                <td><button data-track="{{ track['name'] }}" data-artist="{{ track['album']['artists'][0]['name'] }}" class="sharebutton" role="button" onclick="showDetails(this)">Share</button></td>
+
             </tr>
-            {% endfor %}
+
         </tbody>
 
-    {{ artist_result }}
+    <script>
+    function showDetails(dataRow) {
+        var track = dataRow.getAttribute("data-track");
+        var artist = dataRow.getAttribute("data-artist");
+        localStorage["song"] = track;
+        localStorage['artist'] = artist;
+        // jQuery.get('/share?song=' + track);
+        location.href = "/share";
+        }
+
+    </script>
+    {% endfor %}
+
     <!---artist results--->
     {% elif artist_result|length > 0 %}
         <thead>
@@ -99,5 +113,6 @@
         </tbody>
     {% endif %}
     </table>
+
 
 {% endblock %}

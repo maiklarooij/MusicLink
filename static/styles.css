@@ -104,3 +104,36 @@ float: right;
 .shadowdiv {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+/*.backgroundz{*/
+/*    background-image: url("musical.jpg");*/
+/*    background-repeat: no-repeat;*/
+/*      background-size: 100% 100%;*/
+input {
+    width: 800px;
+    height: 100px;
+}
+::-webkit-textarea-placeholder {
+   text-align: center;
+}
+.feed-username{
+    font-size:20px;
+}
+.feed-comment{
+    font-style:italic;
+}
+.feed-time{
+    text-align:right;
+}
+.feed-container{
+    display: inline-block;
+
+}
+.col-sm-8{
+    outline: 2px solid black;
+}
+#feedhead{
+        font-family: papyrus;
+}
+.feed-individual{
+      outline: 1px dotted grey;
+}
