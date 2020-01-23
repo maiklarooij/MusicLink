@@ -47,6 +47,8 @@ main .form-control
 
 body {
     padding-top: 8em;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 #friendspage {
@@ -116,3 +118,4 @@ input {
 .feed-individual{
       outline: 1px dotted grey;
 }
+

@@ -294,7 +294,7 @@ def ownprofile():
     gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
 
     profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
-    print(spotify.me())
+
     if request.method == "GET":
         return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
         top_tracks=nummer_artiest, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
