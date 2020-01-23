@@ -462,16 +462,16 @@ def profile():
         artiest = spotify.artist(top_artists[0][artist])
         artists.append((artiest['name'], artiest['images'][0]['url']))
 
-    top_artists = []
+    albums = []
     for liedje in top_tracks[0]:
         nummer = spotify.track(top_tracks[0][liedje])
-        top_artists.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+        albums.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
 
     profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
 
     if request.method == "GET":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=top_artists,
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=albums,
         top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
     elif request.method == "POST":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=top_artists,
+        return render_template("profile.html", gebruikersnaam=username, top_tracks=albums,
         top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
