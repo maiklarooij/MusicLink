@@ -68,6 +68,8 @@ def home():
         for followed in followinglist:
             shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:userid", userid=followed['followeduserid']))
         shared_data.append(db.execute("SELECT * FROM shared WHERE userid=:myid", myid=session['user_id']))
+        for data in shared_data:
+            data.sort(key=lambda data:data['time'], reverse=True)
         print(shared_data)
         return render_template("home.html", titles=titles, shared=shared_data)
 
