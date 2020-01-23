@@ -46,6 +46,9 @@ main .form-control
 
 
 body {
+    padding-top: 8em;
+    max-width: 100%;
+    overflow-x: hidden;
     padding-top: 6em;
 }
 
@@ -137,3 +140,4 @@ input {
 .feed-individual{
       outline: 1px dotted grey;
 }
+
