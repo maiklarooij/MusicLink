@@ -20,6 +20,9 @@
 
     <div class="container marketing">
         <div class="row">
+            {% if users|length < 3 %}
+            <div class="col-sm"></div>
+            {% endif %}
             {% for user in users %}
 
                 <div class="col-lg-4">
@@ -39,6 +42,9 @@
                 </div>
 
             {% endfor %}
+            {% if users|length < 3 %}
+            <div class="col-sm"></div>
+            {% endif %}
         </div>
     </div>
 

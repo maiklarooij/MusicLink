@@ -128,9 +128,9 @@ def register():
                 profilepic = profilepic[0]['url']
 
 
-            db.execute("INSERT INTO users (username, hash, spotifyid) VALUES (:username, :password, :spotifyid)",
+            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
                         username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
-                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id)
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
 
             rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))

@@ -19,7 +19,7 @@
         <h5>We just generated a brand new playlist just for you!</h5>
         <ul class="list-group list-group-flush">
             {% for title in titles %}
-                <li class="list-group-item"><img src= "{{ title['img'] }}" alt="nummer" width="35" height="35" align="left"><a href="{{ title['link'] }}">{{ ', '.join(title['artists']) }} - {{ title['name'] }}</a></li>
+                <li class="list-group-item"><img src= "{{ title['img'] }}" alt="nummer" width="35" height="35" align="left"><a href="{{ title['link'] }}" target="_blank">{{ ', '.join(title['artists']) }} - {{ title['name'] }}</a></li>
             {% endfor %}
 
         </ul>
