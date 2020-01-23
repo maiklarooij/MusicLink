@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Searched
+{% endblock %}
+
+{% block main %}
+
+<h3>Share this song with your friends</h3>
+<form action="/share" method="post">
+    <div class="form-group">
+        <input name ="sharedtext" type="text" id="myInput" />
+        <button value="button">Share</button>
+    </div>
+
+</form>
+<script>
+    track = localStorage["song"];
+    artist = localStorage['artist'];
+    document.getElementById("myInput").value = "Hey friend, you should listen to this track called '" + track + "' by '" + artist + "'!";
+
+</script>
+
+{% endblock %}
