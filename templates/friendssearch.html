@@ -11,28 +11,27 @@
         {% for result in results %}
             <div class="row flex" style="margin-top: 30px; align-items: center; width: 100%">
                 <div class="col-sm"></div>
-                <div class="col-">
-                    <form action="/profile" method="POST">
-                        <input type="image" src="{{ result['profilepic'] }}" class="center-cropped-small" value="{{ result['username'] }}" name='username'>
+                    <div class="col-">
+                        <form action="/profile" method="POST">
+                            <input type="image" src="{{ result['profilepic'] }}" class="center-cropped-small" value="{{ result['username'] }}" name='username'>
+                        </form>
+                    </div>
+                    <div class="col-">
+                        <form action="/profile" method="POST">
+                            <input type="submit" class="btn default" value="{{ result['username'] }}" name='username' style="background-color: inherit; font-size: 20px; font-weight: bold">
+                        </form>
+                    </div>
+                    <div class="col-" style="display: table-cell; vertical-align: center;">
+                        <form action="/follow" method="post">
+                        {% if result['userid'] in following %}
+                            <button type="submit" class="btn btn-success btn-sm" value="{{ result['username'] }}" name='follow'>Unfollow</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-outline-success btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
+                        {% endif %}
                     </form>
-                </div>
-                <div class="col-">
-                    <form action="/profile" method="POST">
-                        <input type="submit" class="btn default" value="{{ result['username'] }}" name='username' style="background-color: inherit; font-size: 20px; font-weight: bold">
-                    </form>
-                </div>
-                <div class="col-" style="display: table-cell; vertical-align: center;">
-                    <form action="/follow" method="post">
-                    {% if result['userid'] in following %}
-                        <button type="submit" class="btn btn-success btn-sm" value="{{ result['username'] }}" name='follow'>Unfollow</button>
-                    {% else %}
-                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
-                    {% endif %}
-                </form>
-                </div>
+                    </div>
                 <div class="col-sm"></div>
             </div>
-
         {% endfor %}
     </body>
 
