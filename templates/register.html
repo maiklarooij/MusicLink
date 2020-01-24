@@ -8,15 +8,44 @@
 
     <form id="register" action="/register" method="post">
         <div class="form-group">
-          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
         </div>
         <div class="form-group">
-          <input type="password" class="form-control" name="password" placeholder="Password">
+          <input type="password" class="form-control" name="password" placeholder="Password" required>
         </div>
         <div class="form-group">
-          <input type="password" class="form-control" name="confirmation" placeholder="Confirmation">
+          <input type="password" class="form-control" name="confirmation" placeholder="Confirmation" required>
         </div>
         <button class="btn btn-primary" id="submit" type="submit">Register</button>
     </form>
 
+    <div class="form-popup bg-light shadowdiv" id="login">
+        <form action="/login" method="post">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="username"><b>Username</b></label>
+                <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password"><b>Password</b></label>
+                <input type="password" class="form-control" placeholder="Enter password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+  <script>
+
+    var opened = false;
+    function openLogin(){
+        if (opened == true) {
+            document.getElementById("login").style.display = 'none';
+        }
+        else {
+            document.getElementById("login").style.display = 'block';
+        }
+        opened = !opened;
+    }
+
+  </script>
 {% endblock %}

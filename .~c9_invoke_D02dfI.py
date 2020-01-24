@@ -75,7 +75,7 @@ def home():
 
         for message in feed:
             message['trackinfo'] = spotify.track(message['spotifyid'])
-            message['profilepic'] = db.execute("SELECT profilepic FROM users WHERE userid = :userid", userid=message['userid'])[0]['profilepic']
+            message['profilepic'] = db.execute("Sele")
         feed = sorted(feed, key=lambda x: x['time'], reverse=True)
 
 

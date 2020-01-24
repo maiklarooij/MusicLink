@@ -5,24 +5,44 @@
 {% endblock %}
 
 {% block main %}
+
+
+
     <div class="row">
-        <div class="col-sm-8"><h2 id='feed-head'>Feed</h2>
+        <div class="col-sm-8">
         {% for message in feed %}
-            <div class=feed-individual>
-            <div class="feed-username">
-                <b>{{ message['username'] }}:</b>
-                <div class="feed-comment">
+        <div class="feed-item">
+            <div class="row flex feed-info">
+                <div class="col- flex">
+                    <img class="center-cropped-small" src="{{ message['profilepic'] }}">
+                    <b style="margin-left: 10px">{{ message['username'] }}:</b>
+                </div>
+                <div class="col-sm">
                     {{ message['value'] }}
                 </div>
-                <div class="feed-time">
-                    {{ message['time'] }}
+                <div class="col-"></div>
+                <div class="col-">
+                    <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
+                </div>
+                <div class="col" style="font-size: 12px;">
+                    <a href="{{ message['trackinfo']['uri'] }}">
+                        {{ message['trackinfo']['name'] }} <br>
+                        {{ message['trackinfo']['artists'][0]['name'] }}
+                    </a>
                 </div>
 
             </div>
+            <div class="feed-time">
+                {{ message['time'] }}
             </div>
-        {% endfor %}
 
         </div>
+
+        {% endfor %}
+        </div>
+
+
+
         <div class="col-sm-4">
             <h2>Recommendations based on what your friends listen!</h2>
             {% if not titles %}

@@ -44,23 +44,16 @@
 
                 <!---spotify link--->
                 <td><a href='{{ track['external_urls']['spotify'] }}'>Open in spotify</a></td>
-                <td><button data-track="{{ track['name'] }}" data-artist="{{ track['album']['artists'][0]['name'] }}" class="sharebutton" role="button" onclick="showDetails(this)">Share</button></td>
+                <td>
+                    <form action="/share" method="GET">
+                        <button name="share" class="btn btn-succes" role="button" value="{{ track['id'] }}">Share</button>
+                    </form>
+                </td>
 
             </tr>
 
         </tbody>
 
-    <script>
-    function showDetails(dataRow) {
-        var track = dataRow.getAttribute("data-track");
-        var artist = dataRow.getAttribute("data-artist");
-        localStorage["song"] = track;
-        localStorage['artist'] = artist;
-        // jQuery.get('/share?song=' + track);
-        location.href = "/share";
-        }
-
-    </script>
     {% endfor %}
 
     <!---artist results--->
