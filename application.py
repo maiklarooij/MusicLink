@@ -11,6 +11,8 @@ from collections import Counter
 import json
 
 from helpers import apology, login_required, update_database_top, get_following, get_friends_recommendations, get_feed, update_profilepic, register_user, search_spotify
+import ast
+
 from datetime import datetime
 import random
 import spotipy
@@ -169,31 +171,12 @@ def login():
         return render_template("login.html")
 
 
-@app.route('/search', methods=["GET", "POST"])
+@app.route('/search', methods=["GET"])
 @login_required
 def search():
     """ Search for Spotify tracks, artists and albums """
 
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-
-        # Get Spotify OAuth token
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
-
-        # Get user search query
-        input = request.form.get("search")
-        searchtype = request.form.get("type")
-
-        # Get search result from Spotify
-        searchresults = search_spotify(spotify, input, searchtype)
-
-        # Show results
-        return render_template("searched.html", searchresults=searchresults, searchtype=searchtype)
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("search.html")
+    return render_template("search.html")
 
 @app.route('/searched', methods=["GET", "POST"])
 @login_required
@@ -214,7 +197,8 @@ def searched():
     # Show results
     return render_template("searched.html", searchresults=searchresults, searchtype=searchtype)
 
-@app.route("/playlist", methods=["GET","POST"])
+
+@app.route("/playlist", methods=["GET"])
 @login_required
 def playlist():
 
@@ -223,29 +207,41 @@ def playlist():
 
     # take top 5 tracks
     # take top 5 artists
-    songs = []
 
     artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
     tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
 
     recommendations = spotify.recommendations(seed_artists=random.sample(artists, 2), seed_tracks=random.sample(tracks, 3), limit=30)['tracks']
     titles = []
+    global uris
+    uris = []
     for recommendation in recommendations:
         titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
-    # create
+    for song in recommendations:
+        uris.append(song['uri'])
+    return render_template("playlist.html", titles=titles, uris=uris)
+
+@app.route("/addedToSpotify", methods=["POST", "GET"])
+@login_required
+def addedToSpotify():
     if request.method == "POST":
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
         spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
-        now = datetime.now() # current date and time
-        now = now.strftime("%m/%d_%H:%M")
-        name = 'MusicLink_'+ now
-        playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
-        for song in recommendations:
-            songs.append(song['uri'])
+        # now = datetime.now() # current date and time
+        # now = now.strftime("%m/%d_%H:%M")
+        # name = 'MusicLink_'+ now
+        playlist_name = request.form.get("playlistName")
+        if not playlist_name:
+            return apology("No playlist name entered", 404)
+        playlist_id = spotify.user_playlist_create(user=spotifyid, name=playlist_name)['id']
+        songs = uris
         spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=songs)
         flash("Added to Spotify!")
-    return render_template("playlist.html", titles=titles)
+    return render_template("spotify_add.html")
+
+
+
 
 @app.route("/logout")
 def logout():
