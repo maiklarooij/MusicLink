@@ -16,40 +16,39 @@
 </head>
 <body>
 
-        <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
-            <a href="/home" class="navbar-brand" id="brand">MusicLink</a>
-            <div class="collapse navbar-collapse" id="navbar">
-                {% if session.user_id %}
-                    <ul class="navbar-nav mr-auto">
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/home">Home</a></li>
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/search">Search</a></li>
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/playlist">Playlist</a></li>
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/friends">Friends</a></li>
-                    </ul>
-                    <ul class="navbar-nav ml-auto">
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/ownprofile">Profile</a></li>
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
-                    </ul>
-                {% else %}
-                    <ul class="navbar-nav ml-auto">
-                        <li id="navitem" class="nav-item"><a class="nav-link" href="/authorise">Register</a></li>
-                        <li id="navitem" class="nav-item"><a class="nav-link" onclick="openLogin()" style="cursor: pointer;">Log In</a></li>
-                    </ul>
-                {% endif %}
-            </div>
-        </nav>
+    <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
+        <a href="/home" class="navbar-brand" id="brand">MusicLink</a>
+        <div class="collapse navbar-collapse" id="navbar">
+            {% if session.user_id %}
+                <ul class="navbar-nav mr-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/home">Home</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/search">Search</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/playlist">Playlist</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/friends">Friends</a></li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/ownprofile">Profile</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                </ul>
+            {% else %}
+                <ul class="navbar-nav ml-auto">
+                    <li id="navitem" class="nav-item"><a class="nav-link" href="/authorise">Register</a></li>
+                    <li id="navitem" class="nav-item"><a class="nav-link" onclick="openLogin()" style="cursor: pointer;">Log In</a></li>
+                </ul>
+            {% endif %}
+        </div>
+    </nav>
 
-        {% if get_flashed_messages() %}
-            <header class="alert">
-                <div class="alert alert-primary border text-center" role="alert">
-                    {{ get_flashed_messages() | join(" ") }}
-                </div>
-            </header>
-        {% endif %}
+    {% if get_flashed_messages() %}
+        <header class="alert">
+            <div class="alert alert-primary border text-center" role="alert">
+                {{ get_flashed_messages() | join(" ") }}
+            </div>
+        </header>
+    {% endif %}
 
     <main>
         {% block main %}{% endblock %}
     </main>
-
 
 </body>
