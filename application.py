@@ -290,12 +290,35 @@ def ownprofile():
 
     profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
 
+    following = db.execute("SELECT * FROM following WHERE followuserid=:id", id=session["user_id"])
+    followers = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=session["user_id"])
+
     if request.method == "GET":
-        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze='medium_term', profilepic=profilepic)
+        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], followers=len(followers),
+        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze='medium_term',
+        profilepic=profilepic, following=len(following))
     elif request.method == "POST":
-        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'],
-        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze=term, profilepic=profilepic)
+        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], followers=len(followers),
+        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze=term,
+        profilepic=profilepic, following=len(following))
+
+@app.route('/followinglist', methods=["GET"])
+@login_required
+def followinglist():
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+    users = []
+    for user in followinglist:
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user))
+    return render_template("following.html", followinglist=users)
+
+@app.route('/followerslist', methods=["GET"])
+@login_required
+def followerslist():
+    followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id", id=session["user_id"])
+    users = []
+    for user in followerslist:
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user))
+    return render_template("followers.html", followerslist=users)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
