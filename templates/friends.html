@@ -6,31 +6,38 @@
 
 {% block main %}
 
-    <div style="float: center">
-        <input autocomplete="off" autofocus placeholder="Search for..." type="text" class="search" style="float: center">
+    <div class="row flex animate-bottom" style="align-items: center">
+        <div class="col-sm"></div>
+        <div class="col-">
+            <form action="/search" method="post" class="blocks" style="padding: 3em">
+                <div class="form-group">
+                    <input autocomplete="off" autofocus class="form-control" id="search" name="search" placeholder="Search for users..." type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col-sm"></div>
     </div>
 
 
     <ul id='results'></ul>
 
-    {% if users %}
+    {% if potential_friends %}
     <hr class="featurette-divider">
 
-    <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
-
-    <div class="container marketing">
+    <div class="container marketing blocks animate-bottom">
+        <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
         <div class="row">
-            {% if users|length < 3 %}
+            {% if potential_friends|length < 3 %}
             <div class="col-sm"></div>
             {% endif %}
-            {% for user in users %}
+            {% for user in potential_friends %}
 
                 <div class="col-lg-4">
-                    <form action="/profile" method="POST">
-                        <input type="image" src="{{ user['img'] }}" class="center-cropped" value="{{ user['name'] }}" name='username'>
+                    <form action="/profile" method="post">
+                        <button type="submit" value="{{ user['name'] }}" name="username" class="center-cropped" style="background: url({{ user['img'] }}); background-position: center center; background-size: cover; cursor: pointer"></button>
                     </form>
                     <p></p>
-                    <form action="/profile" method="POST">
+                    <form action="/profile" method="post">
                         <input type="submit" class="btn default" value="{{ user['name'] }}" name='username' style="background-color: inherit; font-size: 30px; font-weight: bold">
                     </form>
                     <p>Listening mostly to: {{ user['genre1'] }}, {{ user['genre2'] }} and {{ user['genre3'] }}</p>
@@ -42,7 +49,7 @@
                 </div>
 
             {% endfor %}
-            {% if users|length < 3 %}
+            {% if potential_friends|length < 3 %}
             <div class="col-sm"></div>
             {% endif %}
         </div>
@@ -52,7 +59,7 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
-        let input = document.querySelector('.search');
+        let input = document.querySelector('#search');
         input.onkeyup = function() {
             $.get('/friendssearch?q=' + input.value, function(data) {
                 document.querySelector('#results').innerHTML = data;

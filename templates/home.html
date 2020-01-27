@@ -7,9 +7,9 @@
 {% block main %}
 
 
-
+<div style="margin-right: 7em; margin-left: 7em">
     <div class="row">
-        <div class="col-sm-7">
+        <div class="col-sm-7 blocks-home animate-bottom">
         <h2>What are your friends listening to?</h2>
         {% for message in feed %}
         <div class="feed-item whiteshadow">
@@ -26,7 +26,7 @@
                     <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
                 </div>
                 <div class="col" style="font-size: 12px;">
-                    <a style="color: #D4AF37" href="{{ message['trackinfo']['uri'] }}">
+                    <a href="{{ message['trackinfo']['uri'] }}">
                         {{ message['trackinfo']['name'] }} <br>
                         {{ message['trackinfo']['artists'][0]['name'] }}
                     </a>
@@ -44,7 +44,7 @@
 
 
 
-        <div class="col-sm recommendations whiteshadow">
+        <div class="col-sm blocks-home whiteshadow animate-bottom">
             <h2>Recommendations based on what your friends listen!</h2>
             {% if not recommendations %}
                 You are not following anyone! Start following users to get recommendations based on what they listen!
@@ -67,7 +67,7 @@
         {% endfor %}
         </div>
     </div>
-
+</div>
 <script>
 
 </script>

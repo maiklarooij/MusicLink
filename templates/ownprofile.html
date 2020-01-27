@@ -5,30 +5,29 @@
 {% endblock %}
 
 {% block main %}
-
-    <div class="row flex" style="align-items: center">
-        <div class="col-sm"></div>
-        <div class="col-" style="padding: 10px">
-            <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
+    <div class="blocks animate-bottom">
+        <div class="row flex" style="align-items: center">
+            <div class="col-sm"></div>
+            <div class="col-" style="padding: 10px">
+                <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
+            </div>
+            <div class="col-" style="padding: 10px">
+                <h3>{{ username }}</h3>
+                <form action="/settings">
+                    <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button>
+                </form>
+            </div>
+            <div class="col-sm"></div>
         </div>
-        <div class="col-" style="padding: 10px">
-            <h3>{{ gebruikersnaam }}</h3>
-            <form action="/settings">
-                <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button>
-            </form>
-        </div>
-        <div class="col-sm"></div>
-    </div>
-    <i><h4>From what period do you want to see your statistics?</h4></i>
-    </p>
+    <i><h4 style="margin-top: 1em">From what period do you want to see your statistics?</h4></i>
     <form action="/ownprofile" method="post">
         <div class="form-group">
             <select class="form-control" name="term" onchange="this.form.submit();">
-                {% if keuze == "short_term" %}
+                {% if term == "short_term" %}
                     <option value="short_term" selected>Last month</option>
                     <option value="medium_term">Last half year</option>
                     <option value="long_term">All time</option>
-                {% elif keuze == "medium_term" %}
+                {% elif term == "medium_term" %}
                     <option value="short_term">Last month</option>
                     <option value="medium_term" selected>Last half year</option>
                     <option value="long_term">All time</option>
@@ -40,48 +39,53 @@
             </select>
         </div>
     </form>
-
-    </p>
-    <div style='float:left; width:30%' style="margin-bottom: 60px;">
-        <b>Most listened songs</b>
-        </p>
-        </p>
-        <ul class="list-group list-group-flush">
-            {% for nummer in top_tracks %}
-            <li class="list-group-item"><img src= {{ nummer[2] }} alt="nummer" width="35" height="35" align="left">{{ nummer[0] }} - {{ nummer[1] }}</li>
-            {% endfor %}
-        </ul>
     </div>
 
-    <div style='float:left; width:30%; margin-left:35px'>
-        <b>Most listened artists</b>
-        </p>
-        </p>
-        <ul class="list-group list-group-flush">
-            {% for artist in top_artists %}
-            <li class="list-group-item"><img src= {{ artist[1] }} alt="nummer" width="35" height="35" align="left">{{ artist[0] }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div style='float:left; width:30%; margin-left:35px'>
-        <b>Favorite genres</b>
-        </p>
-        <ul class="list-group list-group-flush">
-            {% for genre in genres %}
-            <li class="list-group-item">{{ genre }}</li>
-            {% endfor %}
-        </ul>
-        </p>
+    <div class="results">
+        <div class="row">
+            <div class="col animate-bottom">
+                <b>Most listened songs</b>
+                </p>
+                </p>
+                <ul class="list-group list-group-flush">
+                    {% for track in top_tracks %}
+                    <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
 
-        <h6 style="padding-top: 40px;"><b>Recently played</b></h6>
-        </p>
-        <ul class="list-group list-group-flush">
-            {% for nummer in recent %}
-            <li class="list-group-item"><img src= {{ nummer[2] }} alt="nummer" width="35" height="35" align="left">{{ nummer[0] }} - {{ nummer[1] }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+        <div class="col animate-bottom">
+            <b>Most listened artists</b>
+            </p>
+            </p>
+            <ul class="list-group list-group-flush">
+                {% for artist in top_artists %}
+                <li class="list-group-item"><img src= {{ artist[1] }} alt="track" width="35" height="35" align="left">{{ artist[0] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
+        <div class="col animate-bottom">
+            <b>Favorite genres</b>
+            </p>
+            <ul class="list-group list-group-flush">
+                {% for genre in genres %}
+                <li class="list-group-item">{{ genre }}</li>
+                {% endfor %}
+            </ul>
+            </p>
+
+            <h6 style="padding-top: 40px;"><b>Recently played</b></h6>
+            </p>
+            <ul class="list-group list-group-flush">
+                {% for track in recent %}
+                <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        </div>
+
+    </div>
     <div class="clear"></div>
     </div>
 
