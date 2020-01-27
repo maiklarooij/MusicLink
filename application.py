@@ -53,22 +53,23 @@ def home():
     # Get Spotify OAuth token
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
+    check_follow = get_following()
+    if len(check_follow) > 0:
+        # Store top 5 songs, artists and genres from user in database
+        update_database_top(spotify)
 
-    # Store top 5 songs, artists and genres from user in database
-    update_database_top(spotify)
+        # Get a list of id's that the user is following
+        following = get_following()
 
-    # Get a list of id's that the user is following
-    following = get_following()
+        # Get recommendations based on following users
+        recommendations = get_friends_recommendations(spotify, following)
 
-    # Get recommendations based on following users
-    recommendations = get_friends_recommendations(spotify, following)
+        # Get the shared messages from people the user follows
+        feed = get_feed(spotify, following)
+        # Render home template
+        return render_template("home.html", recommendations=recommendations, feed=feed)
 
-    # Get the shared messages from people the user follows
-    feed = get_feed(spotify, following)
-
-    # Render home template
-    return render_template("home.html", recommendations=recommendations, feed=feed)
-
+    return render_template("home.html")
 
 @app.route("/authorise", methods=["POST", "GET"])
 def authorise():
@@ -118,7 +119,6 @@ def register():
         if len(db.execute("SELECT * FROM users WHERE username = :username",
             username=request.form.get("username"))) != 0:
             return apology("username already exists")
-
         # Get Spotify OAuth token
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)

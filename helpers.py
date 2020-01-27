@@ -74,9 +74,9 @@ def update_database_top(spotify):
                 genre1=genres[0], genre2=genres[1], genre3=genres[2], userid=session["user_id"])
 
 def get_following():
+    following = []
     followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session['user_id'])
     if len(followinglist) != 0:
-        following = []
         for followed in followinglist:
             following.append(followed['followeduserid'])
 
