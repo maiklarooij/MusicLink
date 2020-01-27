@@ -5,13 +5,14 @@
 {% endblock %}
 
 {% block main %}
+
 <div id = "alert_placeholder"></div>
      <div class="row">
         <div class="col">
             <h3>Your personal playlist</h3>
         </div>
         <div class="button-right" class="col">
-            <form action="/playlist" method="post" id="form">
+            <form action="/addedToSpotify" method="get" id="form">
                 <button class="btn btn-primary" type="submit">Add to Spotify</button>
             </form>
         </div>
@@ -23,15 +24,14 @@
             {% endfor %}
 
         </ul>
-<script>
-
+<script type="text/javascript">
+localStorage.setItem('uris', '{{ uris }}')
 bootstrap_alert = function() {}
 bootstrap_alert.warning = function(message) {
             $('#alert_placeholder').html('<div class="alert alert-success"><a class="close" data-dismiss="alert"></a><span>'+message+'</span></div>')
         }
 
-$('#button').on('click', function() {
-            bootstrap_alert.warning('Added to spotify!');
-});
+
+
 </script>
 {% endblock %}

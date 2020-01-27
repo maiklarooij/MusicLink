@@ -1,5 +1,5 @@
 #brand {
-    color: white;
+    color: #D4AF37;
     font-family: papyrus;
     font-size: 200%;
 }
@@ -12,6 +12,7 @@
 
 #navitem{
     font-size: 125%;
+    color: #D4AF37;
 }
 
 #center {
@@ -20,8 +21,7 @@
 
 main {
     text-align: center;
-    margin-right: 10px;
-    margin-left: 10px;
+
 }
 
 main .form-control
@@ -107,37 +107,30 @@ float: right;
 .shadowdiv {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-/*.backgroundz{*/
-/*    background-image: url("musical.jpg");*/
-/*    background-repeat: no-repeat;*/
-/*      background-size: 100% 100%;*/
-input {
-    width: 800px;
-    height: 100px;
-}
-::-webkit-textarea-placeholder {
-   text-align: center;
-}
-.feed-username{
-    font-size:20px;
-}
-.feed-comment{
-    font-style:italic;
-}
-.feed-time{
-    text-align:right;
-}
-.feed-container{
-    display: inline-block;
 
-}
-.col-sm-8{
-    outline: 2px solid black;
-}
-#feedhead{
-        font-family: papyrus;
-}
-.feed-individual{
-      outline: 1px dotted grey;
+.whiteshadow {
+    box-shadow: 0 4px 8px 0 rgba(225, 225, 225, 0.2), 0 6px 20px 0 rgba(225, 225, 225, 0.19);
 }
 
+.feed-item {
+    align-items: center;
+    padding: 25px;
+    margin: 10px;
+}
+
+.feed-info {
+    align-items: center;
+    margin-left: 10px;
+}
+
+.feed-time {
+    float: right;
+    font-size: 12px;
+    color: grey;
+}
+
+
+.recommendations {
+    padding: 20px;
+    margin-right: 2em
+}

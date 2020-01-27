@@ -10,13 +10,11 @@ from functools import wraps
 from collections import Counter
 import json
 
-from helpers import apology, login_required, update_database_top, get_following, get_friends_recommendations, get_feed, update_profilepic, register_user, search_spotify
-import ast
-
 from datetime import datetime
 import random
 import spotipy
 import authentication
+from helpers import login_required, apology, update_database_top
 
 # Configure application
 app = Flask(__name__)
@@ -35,78 +33,83 @@ db = SQL("sqlite:///musiclink.db")
 
 @app.route("/", methods=["GET"])
 def start():
-    """ Page where users can choose to register their account or log in to existing accounts """
-
-    # Logs out the user before accessing start page
     session.clear()
 
-    # Render start template
     return render_template("start.html")
-
 
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
-    """ Displays the home page with a friends feed and track recommendations
-        based on who the user follows """
 
-    # Get Spotify OAuth token
     oauth = authentication.getAccessToken()[0]
     spotify = spotipy.Spotify(auth=oauth)
 
-    # Store top 5 songs, artists and genres from user in database
     update_database_top(spotify)
 
-    # Get a list of id's that the user is following
-    following = get_following()
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session['user_id'])
+    if len(followinglist) != 0:
+        following = []
+        for followed in followinglist:
+            following.append(followed['followeduserid'])
 
-    # Get recommendations based on following users
-    recommendations = get_friends_recommendations(spotify, following)
+        tracks = []
+        for userid in following:
+            tracks.append(db.execute("SELECT track1 FROM top WHERE userid = :userid", userid=userid)[0]['track1'])
+            tracks.append(db.execute("SELECT track2 FROM top WHERE userid = :userid", userid=userid)[0]['track2'])
+            tracks.append(db.execute("SELECT track3 FROM top WHERE userid = :userid", userid=userid)[0]['track3'])
+            tracks.append(db.execute("SELECT track4 FROM top WHERE userid = :userid", userid=userid)[0]['track4'])
+            tracks.append(db.execute("SELECT track5 FROM top WHERE userid = :userid", userid=userid)[0]['track5'])
 
-    # Get the shared messages from people the user follows
-    feed = get_feed(spotify, following)
+        recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
+        titles = []
+        for recommendation in recommendations:
+            titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
 
-    # Render home template
-    return render_template("home.html", recommendations=recommendations, feed=feed)
+        following.append(session["user_id"])
+
+        messages = db.execute("SELECT * FROM shared")
+        feed = []
+        for message in messages:
+            if message['userid'] in following:
+                feed.append(message)
+
+        for message in feed:
+            message['trackinfo'] = spotify.track(message['spotifyid'])
+            message['profilepic'] = db.execute("Sele")
+        feed = sorted(feed, key=lambda x: x['time'], reverse=True)
+
+
+        return render_template("home.html", titles=titles, feed=feed)
+
+    return render_template("home.html")
 
 
 @app.route("/authorise", methods=["POST", "GET"])
 def authorise():
-    """ Gets Spotify authorisation """
-
     response = authentication.getUser()
-
-    # Redirect to callback
     return redirect(response)
 
 @app.route('/callback')
 def callback():
-    """ Redirected to after Spotify authorisation, redirects to home or register page """
-
-    # Get Spotify user token
     authentication.getUserToken(request.args['code'])
-
-    # If there is someone logged in
     if session.get("user_id") != None:
-
-        # Get Spotify OAuth token
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
 
-        # Update profilepic with photo from Spotify
-        update_profilepic(spotify)
+        profilepic = spotify.current_user()["images"]
+        if len(profilepic) == 0:
+            profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
+        else:
+            profilepic = profilepic[0]['url']
 
-        # Redirect to home
+        db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
         return redirect("/home")
 
-    # Else if no one is logged in, redirect to register a new user
     else:
         return redirect("/register")
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
-    """ Register new user """
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -119,14 +122,33 @@ def register():
             username=request.form.get("username"))) != 0:
             return apology("username already exists")
 
-        # Get Spotify OAuth token
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
+        # Insert the username and hashed password into users database
+        else:
+            oauth = authentication.getAccessToken()[0]
+            spotify = spotipy.Spotify(auth=oauth)
 
-        # Register new user
-        register_user(spotify)
+            spotify_id = spotify.current_user()["id"]
+
+            profilepic = spotify.current_user()["images"]
+            if len(profilepic) == 0:
+                profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
+            else:
+                profilepic = profilepic[0]['url']
+
+
+            db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
+                        username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
+                        method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
+
+            rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username"))
+
+            session["user_id"] = rows[0]["userid"]
+
+            db.execute("INSERT INTO top (userid) VALUES (:userid)", userid=session["user_id"])
+
+
         flash('Succesfully registered!')
-
         # Redirect user to home page
         return redirect("/home")
 
@@ -171,34 +193,39 @@ def login():
         return render_template("login.html")
 
 
-@app.route('/search', methods=["GET"])
+@app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
-    """ Search for Spotify tracks, artists and albums """
+    if request.method == "POST":
 
-    return render_template("search.html")
+        oauth = authentication.getAccessToken()[0]
+        spotify = spotipy.Spotify(auth=oauth)
+        pictures = []
+        track_result = dict()
+        album_result = dict()
+        artist_result = dict()
+        duration = []
+        input = request.form.get("search")
+        searchtype = request.form.get("type")
+        if searchtype == 'track':
+            track_result = spotify.search(q='track:' + input, type=searchtype)
+            print("search")
+        elif searchtype == "artist":
+            artist_result = spotify.search(q='artist:' + input, type=searchtype)
+        elif searchtype == 'album':
+            album_result = spotify.search(q='album:' + input, type=searchtype)
+        if not artist_result:
+            if not track_result:
+                if not album_result:
+                    return apology("No results", 404)
 
-@app.route('/searched', methods=["GET", "POST"])
-@login_required
-def searched():
-    # Get Spotify OAuth token
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+        return render_template("searched.html", track_result=track_result, artist_result=artist_result,
+                                album_result=album_result, pictures=pictures, duration=duration)
 
-    # Get user search query
-    input = request.args.get("q")
-    searchtype = request.args.get("searchtype")
+    else:
+        return render_template("search.html")
 
-    print(input, searchtype)
-
-    # Get search result from Spotify
-    searchresults = search_spotify(spotify, input, searchtype)
-
-    # Show results
-    return render_template("searched.html", searchresults=searchresults, searchtype=searchtype)
-
-
-@app.route("/playlist", methods=["GET"])
+@app.route("/playlist", methods=["GET","POST"])
 @login_required
 def playlist():
 
@@ -207,41 +234,29 @@ def playlist():
 
     # take top 5 tracks
     # take top 5 artists
+    songs = []
 
     artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
     tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
 
     recommendations = spotify.recommendations(seed_artists=random.sample(artists, 2), seed_tracks=random.sample(tracks, 3), limit=30)['tracks']
     titles = []
-    global uris
-    uris = []
     for recommendation in recommendations:
         titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
-    for song in recommendations:
-        uris.append(song['uri'])
-    return render_template("playlist.html", titles=titles, uris=uris)
-
-@app.route("/addedToSpotify", methods=["POST", "GET"])
-@login_required
-def addedToSpotify():
+    # create
     if request.method == "POST":
         oauth = authentication.getAccessToken()[0]
         spotify = spotipy.Spotify(auth=oauth)
         spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
-        # now = datetime.now() # current date and time
-        # now = now.strftime("%m/%d_%H:%M")
-        # name = 'MusicLink_'+ now
-        playlist_name = request.form.get("playlistName")
-        if not playlist_name:
-            return apology("No playlist name entered", 404)
-        playlist_id = spotify.user_playlist_create(user=spotifyid, name=playlist_name)['id']
-        songs = uris
+        now = datetime.now() # current date and time
+        now = now.strftime("%m/%d_%H:%M")
+        name = 'MusicLink_'+ now
+        playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
+        for song in recommendations:
+            songs.append(song['uri'])
         spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=songs)
         flash("Added to Spotify!")
-    return render_template("spotify_add.html")
-
-
-
+    return render_template("playlist.html", titles=titles)
 
 @app.route("/logout")
 def logout():

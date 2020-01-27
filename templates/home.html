@@ -5,41 +5,62 @@
 {% endblock %}
 
 {% block main %}
+
+
+
     <div class="row">
-        <div class="col-sm-8"><h2 id='feed-head'>Feed</h2>
+        <div class="col-sm-7">
+        <h2>What are your friends listening to?</h2>
         {% for message in feed %}
-            <div class=feed-individual>
-            <div class="feed-username">
-                <b>{{ message['username'] }}:</b>
-                <div class="feed-comment">
+        <div class="feed-item whiteshadow">
+            <div class="row flex feed-info">
+                <div class="col- flex">
+                    <img class="center-cropped-small" src="{{ message['profilepic'] }}">
+                    <b style="margin-left: 10px">{{ message['username'] }}:</b>
+                </div>
+                <div class="col-sm">
                     {{ message['value'] }}
                 </div>
-                <div class="feed-time">
-                    {{ message['time'] }}
+                <div class="col-"></div>
+                <div class="col-">
+                    <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
+                </div>
+                <div class="col" style="font-size: 12px;">
+                    <a style="color: #D4AF37" href="{{ message['trackinfo']['uri'] }}">
+                        {{ message['trackinfo']['name'] }} <br>
+                        {{ message['trackinfo']['artists'][0]['name'] }}
+                    </a>
                 </div>
 
             </div>
+            <div class="feed-time">
+                {{ message['time'] }}
             </div>
-        {% endfor %}
 
         </div>
-        <div class="col-sm-4">
+
+        {% endfor %}
+        </div>
+
+
+
+        <div class="col-sm recommendations whiteshadow">
             <h2>Recommendations based on what your friends listen!</h2>
-            {% if not titles %}
+            {% if not recommendations %}
                 You are not following anyone! Start following users to get recommendations based on what they listen!
                 <p></p>
                 <form method="get" action="/friends">
                     <button class="btn btn-primary" type="submit">Find friends!</button>
                 </form>
             {% endif %}
-            {% for title in titles %}
-            <a href="{{ title['link'] }}" target="_blank">
-                <div class="row align-items-center" href="{{ title['link'] }}">
+            {% for recommendation in recommendations %}
+            <a href="{{ recommendation['link'] }}" target="_blank">
+                <div class="row align-items-center" href="{{ recommendation['link'] }}">
                     <div class="col-2">
-                        <img src="{{ title['img'] }}" width="50px">
+                        <img src="{{ recommendation['img'] }}" width="50px">
                     </div>
                     <div class="col-8" style="font-size: 12px; text-align: left; text-color: black;">
-                        {{ ', '.join(title['artists']) }} - {{ title['name'] }}
+                        {{ ', '.join(recommendation['artists']) }} - {{ recommendation['name'] }}
                     </div>
                 </div>
             </a>

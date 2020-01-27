@@ -5,20 +5,26 @@
 {% endblock %}
 
 {% block main %}
-
 <h3>Share this song with your friends</h3>
+<div class="row flex" style="align-items: center; margin: 20px;">
+    <div class="col-sm"></div>
+    <div class="col- shadowdiv">
+        <div class="col-sm" style="padding: 10px">
+            <img src="{{ track['album']['images'][0]['url'] }}" width="125px">
+        </div>
+        <div class="col-sm" style="padding: 10px">
+            {{ track['name'] }} <br>
+            {{ ', '.join(artists) }}
+        </div>
+    </div>
+    <div class="col-sm"></div>
+</div>
 <form action="/share" method="post">
     <div class="form-group">
-        <input name ="sharedtext" type="text" id="myInput" />
-        <button value="button">Share</button>
+        <textarea name ="sharedtext" type="text" class="form-control" style="width: 50%;">Listen to this song!</textarea>
     </div>
-
+    <button type="submit" class="btn btn-success" value="{{ track['id'] }}" name="trackid">Share</button>
 </form>
-<script>
-    track = localStorage["song"];
-    artist = localStorage['artist'];
-    document.getElementById("myInput").value = "Hey friend, you should listen to this track called '" + track + "' by '" + artist + "'!";
 
-</script>
 
 {% endblock %}
