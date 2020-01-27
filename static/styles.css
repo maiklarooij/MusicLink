@@ -1,5 +1,5 @@
 #brand {
-    color: white;
+    color: #D4AF37;
     font-family: papyrus;
     font-size: 200%;
 }
@@ -12,6 +12,7 @@
 
 #navitem{
     font-size: 125%;
+    color: #D4AF37;
 }
 
 #center {
@@ -20,8 +21,7 @@
 
 main {
     text-align: center;
-    margin-right: 10px;
-    margin-left: 10px;
+
 }
 
 main .form-control
@@ -108,10 +108,11 @@ float: right;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.whiteshadow {
+    box-shadow: 0 4px 8px 0 rgba(225, 225, 225, 0.2), 0 6px 20px 0 rgba(225, 225, 225, 0.19);
+}
+
 .feed-item {
-    border-style: solid;
-    border-color: lightgrey;
-    border-radius: 5px;
     align-items: center;
     padding: 25px;
     margin: 10px;
@@ -129,3 +130,7 @@ float: right;
 }
 
 
+.recommendations {
+    padding: 20px;
+    margin-right: 2em
+}
