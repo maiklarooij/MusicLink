@@ -57,7 +57,6 @@ def home():
 
     # Get the shared messages from people the user follows
     feed = get_feed(spotify, following)
-
     # Render home template
     return render_template("home.html", recommendations=recommendations, feed=feed)
 
@@ -109,7 +108,6 @@ def register():
         if len(db.execute("SELECT * FROM users WHERE username = :username",
             username=request.form.get("username"))) != 0:
             return apology("username already exists")
-
         # Get Spotify OAuth token
         spotify = authorization.getSpotipy()
 

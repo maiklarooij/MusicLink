@@ -7,43 +7,47 @@
 {% block main %}
 
 
+
 <div style="margin-right: 7em; margin-left: 7em">
     <div class="row">
+
         <div class="col-sm-7 blocks-home animate-bottom">
         <h2>What are your friends listening to?</h2>
-        {% for message in feed %}
-        <div class="feed-item whiteshadow">
-            <div class="row flex feed-info">
-                <div class="col- flex">
-                    <img class="center-cropped-small" src="{{ message['profilepic'] }}">
-                    <b style="margin-left: 10px">{{ message['username'] }}:</b>
-                </div>
-                <div class="col-sm">
-                    {{ message['value'] }}
-                </div>
-                <div class="col-"></div>
-                <div class="col-">
-                    <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
-                </div>
-                <div class="col" style="font-size: 12px;">
-                    <a href="{{ message['trackinfo']['uri'] }}">
-                        {{ message['trackinfo']['name'] }} <br>
-                        {{ message['trackinfo']['artists'][0]['name'] }}
-                    </a>
+            {% if feed | length > 0 %}
+                {% for message in feed %}
+                <div class="feed-item whiteshadow">
+                    <div class="row flex feed-info">
+                        <div class="col- flex">
+                            <img class="center-cropped-small" src="{{ message['profilepic'] }}">
+                            <b style="margin-left: 10px">{{ message['username'] }}:</b>
+                        </div>
+                        <div class="col-sm">
+                            {{ message['value'] }}
+                        </div>
+                        <div class="col-"></div>
+                        <div class="col-">
+                            <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
+                        </div>
+                        <div class="col" style="font-size: 12px;">
+                            <a style="color: #D4AF37" href="{{ message['trackinfo']['uri'] }}">
+                                {{ message['trackinfo']['name'] }} <br>
+                                {{ message['trackinfo']['artists'][0]['name'] }}
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <div class="feed-time">
+                        {{ message['time'] }}
+                    </div>
                 </div>
 
-            </div>
-            <div class="feed-time">
-                {{ message['time'] }}
-            </div>
-
+                {% endfor %}
+            {% else %}
+                Your feed is empty, start following people
+                <input class="btn btn-primary" type="button" onclick="location.href='/friends';" value="Find friends!" />
         </div>
-
-        {% endfor %}
-        </div>
-
-
-
+        {% endif %}
         <div class="col-sm blocks-home whiteshadow animate-bottom">
             <h2>Recommendations based on what your friends listen!</h2>
             {% if not recommendations %}
@@ -68,8 +72,6 @@
         </div>
     </div>
 </div>
-<script>
 
-</script>
 
 {% endblock %}

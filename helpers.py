@@ -82,6 +82,7 @@ def get_following():
     if len(followinglist) != 0:
         following = [followed['followeduserid'] for followed in followinglist]
 
+
     return following
 
 def get_friends_recommendations(spotify, following):
