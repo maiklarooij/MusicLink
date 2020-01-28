@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block main %}
-
     <div class="row flex" style="align-items: center">
         <div class="col-sm"></div>
         <div class="col-" style="padding: 10px">
@@ -16,6 +15,24 @@
             <form action="/settings">
                 <button class="btn btn-secondary" id="submit" type="submit">Edit profile</button>
             </form>
+        </div>
+        <div class="col-sm"></div>
+    </div>
+    <div class="row flex" style="align-items: center">
+        <div class="col-sm"></div>
+        <div class="col-" style="padding: 10px">
+            <div class="center-cropped" style="font-size: 20px;">{{ followers }} </br>
+                <form action="/followerslist">
+                    <input type="submit" class="btn default" value="followers" style="background-color: inherit; font-size: 20px;">
+                </form>
+            </div>
+        </div>
+        <div class="col-" style="padding: 10px">
+            <div class="center-cropped" style="font-size: 20px;">{{ following }} </br>
+                <form action="/followinglist">
+                    <input type="submit" class="btn default" value="following" style="background-color: inherit; font-size: 20px;">
+                </form>
+            </div>
         </div>
         <div class="col-sm"></div>
     </div>
@@ -83,7 +100,6 @@
     </div>
 
     <div class="clear"></div>
-    </div>
 
     <script>
 

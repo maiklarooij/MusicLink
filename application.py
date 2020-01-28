@@ -308,17 +308,21 @@ def followinglist():
     followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
     users = []
     for user in followinglist:
-        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user))
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followeduserid'])[0])
     return render_template("following.html", followinglist=users)
 
 @app.route('/followerslist', methods=["GET"])
 @login_required
 def followerslist():
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+    following = [user['followeduserid'] for user in followinglist]
+
     followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id", id=session["user_id"])
     users = []
     for user in followerslist:
-        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user))
-    return render_template("followers.html", followerslist=users)
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followuserid'])[0])
+
+    return render_template("followers.html", followerslist=users, following=following)
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required

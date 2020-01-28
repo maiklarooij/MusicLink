@@ -134,3 +134,14 @@ float: right;
     padding: 20px;
     margin-right: 2em
 }
+
+.column {
+  float: left;
+  width: 33.33%;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
