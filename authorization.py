@@ -1,4 +1,5 @@
 import base64, json, requests
+import spotipy
 
 #Add your client ID
 CLIENT_ID = "e351ac3d72594cad83fa632150e602df"
@@ -72,3 +73,8 @@ def refreshToken(time):
 
 def getAccessToken():
     return TOKEN_DATA
+
+def getSpotipy():
+    oauth = getAccessToken()[0]
+    spotify = spotipy.Spotify(auth=oauth)
+    return spotify

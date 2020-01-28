@@ -1,9 +1,9 @@
 
     {% if not searchresults[searchtype + "s"]['items'] %}
-        <h2 style="padding-top: 3em">No results!</h2>
+        <h2 class="fadeIn" style="padding-top: 3em">No results!</h2>
 
     {% else %}
-        <table class="table table-hover table-striped ">
+        <table class="table table-hover table-striped">
 
     <!---Track Results--->
     {% if searchtype == 'track' %}

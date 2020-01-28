@@ -1,5 +1,5 @@
 #brand {
-    color: #D4AF37;
+    color: rgba(39,70,185,1);
     font-family: papyrus;
     font-size: 200%;
 }
@@ -21,7 +21,10 @@
 
 main {
     text-align: center;
-
+    padding-top: 3em;
+    position: absolute;
+    top: 9em;
+    width: 100%;
 }
 
 main .form-control
@@ -46,10 +49,10 @@ main .form-control
 
 
 body {
-    padding-top: 8em;
     max-width: 100%;
     overflow-x: hidden;
-    padding-top: 6em;
+    padding-top: 4em;
+    background-color: #f5f6f7 !important;
 }
 
 #startbody {
@@ -130,18 +133,65 @@ float: right;
 }
 
 
-.recommendations {
+.blocks {
     padding: 20px;
-    margin-right: 2em
+    margin-right: 7em;
+    margin-left: 7em;
+    background-color: white;
+    border: 1px solid #DFE1E6;
+    border-radius: 4px;
 }
 
-.column {
-  float: left;
-  width: 33.33%;
+.blocks-home {
+    padding: 20px;
+    margin: 2em;
+    background-color: white;
+    border: 1px solid #DFE1E6;
+    border-radius: 4px;
 }
 
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
+.background {
+    background: linear-gradient(0deg, rgba(81,207,54,1) 0%, rgba(39,70,185,1) 100%);
+    height: 15em;
+    position: relative;
+}
+
+.feed {
+    background-color: white;
+}
+
+.animate-bottom {
+  position: relative;
+  -webkit-animation-name: animatebottom;
+  -webkit-animation-duration: 1s;
+  animation-name: animatebottom;
+  animation-duration: 1s
+}
+
+
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 }
+  to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom {
+  from{ bottom:-100px; opacity:0 }
+  to{ bottom:0; opacity:1 }
+}
+
+
+.fadeIn {
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.results {
+    margin-right: 7em;
+    margin-left: 7em;
+    margin-top: 2em;
 }

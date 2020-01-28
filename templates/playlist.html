@@ -6,19 +6,52 @@
 
 {% block main %}
 
+
 <div id = "alert_placeholder"></div>
-     <div class="row">
-        <div class="col">
-            <h3>Your personal playlist</h3>
+    <div class="blocks animate-bottom" style="padding: 2em">
+{% if alert %}
+    <header class="alert">
+                <div class="alert alert-primary border text-center" role="alert">
+                    Added to Spotify!
+                </div>
+    </header>
+{% endif %}
+
+        <div class="row flex" style="align-items: center">
+    <div>
+    <b>What should the playlist be based on?</b>
+    <form action="/playlist" method="post">
+        <div class="form-group">
+            <select class="form-control" name="action" onchange="this.form.submit();">
+                {% if dependent == "tracks" %}
+                    <option value="tracks" selected>Favorite tracks</option>
+                    <option value="artists">Favorite artists</option>
+                    <option value="tracks&artists">Favorite tracks & artists</option>
+                {% elif dependent == "artists" %}
+                    <option value="tracks">Favorite tracks</option>
+                    <option value="artists"  selected>Favorite artists</option>
+                    <option value="tracks&artists">Favorite tracks & artists</option>
+                {% else %}
+                    <option value="tracks">Favorite tracks</option>
+                    <option value="artists">Favorite artists</option>
+                    <option value="tracks&artists" selected>Favorite tracks & artists</option>
+                {% endif %}
+            </select>
         </div>
-        <div class="button-right" class="col">
-            <form action="/addedToSpotify" method="get" id="form">
-                <button class="btn btn-primary" type="submit">Add to Spotify</button>
-            </form>
+    </form>
+    </div>
+            <div class="col" style="margin-left: 2em">
+                <h3>Your personal playlist</h3>
+                <h5>We just generated a brand new playlist just for you!</h5>
+            </div>
+            <div class="button-right" class="col-">
+                <form action="/playlist" method="post" id="form">
+                    <button class="btn btn-primary btn-lg" type="submit" name="action" value="otherpage" style="margin-right: 1em">Add to Spotify</button>
+                </form>
+            </div>
         </div>
     </div>
-        <h5>We just generated a brand new playlist just for you!</h5>
-        <ul class="list-group list-group-flush">
+        <ul class="list-group list-group-flush results animate-bottom">
             {% for title in titles %}
                 <li class="list-group-item"><img src= "{{ title['img'] }}" alt="nummer" width="35" height="35" align="left"><a href="{{ title['link'] }}" target="_blank">{{ ', '.join(title['artists']) }} - {{ title['name'] }}</a></li>
             {% endfor %}

@@ -5,19 +5,23 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/search" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" id="search" name="search" placeholder="Search for..." type="text">
-            <select class="form-control" id="select" name="type">
-                <option value="track">Tracks</option>
-                <option value="artist">Artists</option>
-                <option value="album">Albums</option>
-            </select>
+    <div class="row flex animate-bottom" style="align-items: center">
+        <div class="col-sm"></div>
+        <div class="col-">
+            <form action="/search" method="post" class="blocks" style="padding: 3em">
+                <div class="form-group">
+                    <input autocomplete="off" autofocus class="form-control" id="search" name="search" placeholder="Search for..." type="text">
+                    <select class="form-control" id="select" name="type">
+                        <option value="track">Tracks</option>
+                        <option value="artist">Artists</option>
+                        <option value="album">Albums</option>
+                    </select>
+                </div>
+            </form>
         </div>
-        <button class="btn btn-outline-primary" type="submit">Search</button>
-    </form>
-
-    <div id="results"></div>
+        <div class="col-lg"></div>
+    </div>
+    <div class="results"></div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
@@ -26,7 +30,7 @@
 
         input.onkeyup = function() {
             $.get('/searched?q=' + input.value + "&searchtype=" + searchtype.value, function(data) {
-            document.querySelector('#results').innerHTML = data;
+            document.querySelector('.results').innerHTML = data;
             });
         };
 

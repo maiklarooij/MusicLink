@@ -4,19 +4,12 @@ from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
-from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from functools import wraps
-from collections import Counter
-import json
 
-from helpers import apology, login_required, update_database_top, get_following, get_friends_recommendations, get_feed, update_profilepic, register_user, search_spotify
-import ast
+from helpers import *
 
-from datetime import datetime
-import random
 import spotipy
-import authentication
+import authorization
 
 # Configure application
 app = Flask(__name__)
@@ -51,31 +44,28 @@ def home():
         based on who the user follows """
 
     # Get Spotify OAuth token
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
-    check_follow = get_following()
-    if len(check_follow) > 0:
-        # Store top 5 songs, artists and genres from user in database
-        update_database_top(spotify)
+    spotify = authorization.getSpotipy()
 
-        # Get a list of id's that the user is following
-        following = get_following()
+    # Store top 5 songs, artists and genres from user in database
+    update_database_top(spotify)
 
-        # Get recommendations based on following users
-        recommendations = get_friends_recommendations(spotify, following)
+    # Get a list of id's that the user is following
+    following = get_following()
 
-        # Get the shared messages from people the user follows
-        feed = get_feed(spotify, following)
-        # Render home template
-        return render_template("home.html", recommendations=recommendations, feed=feed)
+    # Get recommendations based on following users
+    recommendations = get_friends_recommendations(spotify, following)
 
-    return render_template("home.html")
+    # Get the shared messages from people the user follows
+    feed = get_feed(spotify, following)
+    # Render home template
+    return render_template("home.html", recommendations=recommendations, feed=feed)
+
 
 @app.route("/authorise", methods=["POST", "GET"])
 def authorise():
     """ Gets Spotify authorisation """
 
-    response = authentication.getUser()
+    response = authorization.getUser()
 
     # Redirect to callback
     return redirect(response)
@@ -85,14 +75,13 @@ def callback():
     """ Redirected to after Spotify authorisation, redirects to home or register page """
 
     # Get Spotify user token
-    authentication.getUserToken(request.args['code'])
+    authorization.getUserToken(request.args['code'])
 
     # If there is someone logged in
     if session.get("user_id") != None:
 
         # Get Spotify OAuth token
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
+        spotify = authorization.getSpotipy()
 
         # Update profilepic with photo from Spotify
         update_profilepic(spotify)
@@ -120,8 +109,7 @@ def register():
             username=request.form.get("username"))) != 0:
             return apology("username already exists")
         # Get Spotify OAuth token
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
+        spotify = authorization.getSpotipy()
 
         # Register new user
         register_user(spotify)
@@ -176,14 +164,16 @@ def login():
 def search():
     """ Search for Spotify tracks, artists and albums """
 
+    # Show search template
     return render_template("search.html")
 
-@app.route('/searched', methods=["GET", "POST"])
+@app.route('/searched', methods=["GET"])
 @login_required
 def searched():
+    """ Gets search results """
+
     # Get Spotify OAuth token
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+    spotify = authorization.getSpotipy()
 
     # Get user search query
     input = request.args.get("q")
@@ -198,49 +188,45 @@ def searched():
     return render_template("searched.html", searchresults=searchresults, searchtype=searchtype)
 
 
-@app.route("/playlist", methods=["GET"])
+@app.route("/playlist", methods=["GET", "POST"])
 @login_required
 def playlist():
+    """ Generates a playlist based on listening habits """
 
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
 
-    # take top 5 tracks
-    # take top 5 artists
+    # User reached route via GET (as by clicking a link or via redirect) or via selecting tracks&artists as dependent variable
+    if request.method == "GET" or request.form['action'] == 'tracks&artists':
 
-    artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
-    tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        # Define globals to use later
+        global tracks
+        global track_ids
 
-    recommendations = spotify.recommendations(seed_artists=random.sample(artists, 2), seed_tracks=random.sample(tracks, 3), limit=30)['tracks']
-    titles = []
-    global uris
-    uris = []
-    for recommendation in recommendations:
-        titles.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
-    for song in recommendations:
-        uris.append(song['uri'])
-    return render_template("playlist.html", titles=titles, uris=uris)
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify,'both')
 
-@app.route("/addedToSpotify", methods=["POST", "GET"])
-@login_required
-def addedToSpotify():
-    if request.method == "POST":
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
-        spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
-        # now = datetime.now() # current date and time
-        # now = now.strftime("%m/%d_%H:%M")
-        # name = 'MusicLink_'+ now
-        playlist_name = request.form.get("playlistName")
-        if not playlist_name:
-            return apology("No playlist name entered", 404)
-        playlist_id = spotify.user_playlist_create(user=spotifyid, name=playlist_name)['id']
-        songs = uris
-        spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=songs)
-        flash("Added to Spotify!")
-    return render_template("spotify_add.html")
+    elif request.form['action'] == 'tracks':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'tracks')
 
+    elif request.form['action'] == 'artists':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'artists')
 
+    # When clicked on 'export playlist'
+    elif request.form['action'] == 'otherpage':
+
+        return render_template("spotify_add.html")
+
+            # Show template with the same playlist again
+    elif request.form['action'] == 'addSpotify':
+                # Export playlist to Spotify
+        export_playlist(spotify, track_ids)
+            # Show template with playlist
+        return render_template("playlist.html", titles=tracks, alert='on')
+    # Show template with playlist
+    return render_template("playlist.html", titles=tracks, dependent=dependent)
 
 
 @app.route("/logout")
@@ -254,53 +240,43 @@ def logout():
 @app.route('/ownprofile', methods=["GET", "POST"])
 @login_required
 def ownprofile():
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+    """ Shows users listening statistics """
 
-    term = request.form.get("term")
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
 
-    recenten = spotify.current_user_recently_played(limit=6)['items']
-    top_artists = spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]
-    top_tracks = spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]
-    top_artists = [artist["id"] for artist in top_artists]
-    top_tracks = [track["id"] for track in top_tracks]
+    # Standard term is medium term, when chosen different by user, use this
+    if request.method == "GET":
+        term = 'medium_term'
+    else:
+        term = request.form.get("term")
 
-    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])
+    # Let the function know this is the current users profile
+    profile = 'own'
 
-    recent = []
-    for nummer in recenten:
-        liedje = spotify.track(nummer['track']['id'])
-        recent.append((liedje['album']['artists'][0]['name'], liedje['name'], liedje['album']['images'][0]['url']))
-
-    genres = []
-    for genre in top_genres[0]:
-        genres.append(top_genres[0][genre])
-
-    artists = []
-    for artist in top_artists:
-        artiest = spotify.artist(artist)
-        artists.append((artiest['name'], artiest['images'][0]['url']))
-
-    top_artists = []
-    for liedje in top_tracks:
-        nummer = spotify.track(liedje)
-        top_artists.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
-
-    gebruikersnaam = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])
-
-    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
-
+    # Get statistics from Spotify
+    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
     following = db.execute("SELECT * FROM following WHERE followuserid=:id", id=session["user_id"])
     followers = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=session["user_id"])
+    # Render template which shows personal statistics
+    return render_template("ownprofile.html", username=username, following=len(following), followers=len(followers),
+    top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term, profilepic=profilepic)
 
-    if request.method == "GET":
-        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], followers=len(followers),
-        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze='medium_term',
-        profilepic=profilepic, following=len(following))
-    elif request.method == "POST":
-        return render_template("ownprofile.html", gebruikersnaam=gebruikersnaam[0]['username'], followers=len(followers),
-        top_tracks=top_artists, top_artists=artists, genres=genres, recent=recent, keuze=term,
-        profilepic=profilepic, following=len(following))
+
+@app.route('/friends', methods=["GET"])
+@login_required
+def friends():
+    """ Find and follow users """
+
+    # Get users that are followed by active user
+    following = get_following()
+
+    # Generate a list of potential friends based on genre
+    potential_friends = get_potential_friends(following)
+
+    # Render template friends
+    return render_template("friends.html", potential_friends=potential_friends, following=following)
+
 
 @app.route('/followinglist', methods=["GET"])
 @login_required
@@ -327,58 +303,41 @@ def followerslist():
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
-    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
-    following = [user['followeduserid'] for user in following]
-    users = [user for user in db.execute("SELECT username, profilepic, userid FROM users")]
-    users.remove(db.execute("SELECT username, profilepic, userid FROM users WHERE userid=:userid", userid=session['user_id'])[0])
-    q = request.args.get("q")
-    results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
+    """ Shows search results for friends """
+
+    # Get users that are followed by active user
+    following = get_following()
+
+    # Get search result
+    results = search_friends()
+
+    # Show search result
     return render_template("friendssearch.html", results=results, following=following)
 
-@app.route('/friends', methods=["GET"])
-@login_required
-def friends():
-    genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
-    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
-    following = [user['followeduserid'] for user in following]
-
-    samegenreusers = db.execute("SELECT userid, genre1, genre2, genre3 FROM top WHERE genre1 = :genre1 OR genre2 = :genre1 OR genre3 = :genre1 OR genre1 = :genre2 OR genre2 = :genre2 OR genre3 = :genre2 OR genre1 = :genre3 or genre2 = :genre3 OR genre3 = :genre3",
-                    genre1=genres[0]['genre1'], genre2=genres[0]['genre2'], genre3=genres[0]['genre3'])
-
-    samegenreusers = [user for user in samegenreusers if user['userid'] != session["user_id"]]
-    samegenreusers = [user for user in samegenreusers if user['userid'] not in following]
-
-    for user in samegenreusers:
-        user['name'] = db.execute("SELECT username FROM users WHERE userid = :userid", userid=user['userid'])[0]['username']
-        user['img'] = db.execute("SELECT profilepic FROM users WHERE userid = :userid", userid=user['userid'])[0]['profilepic']
-
-    if len(samegenreusers) > 3:
-        samegenreusers = random.sample(samegenreusers, 3)
-    return render_template("friends.html", users=samegenreusers, following=following)
 
 @app.route('/follow', methods=["POST"])
 @login_required
 def follow():
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+    """ (Un)follow user """
 
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
+
+    # Get id from clicked user
     username = request.form.get('follow')
-    usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
-    if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
-        db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
-        spotify.user_follow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
-        flash(f"Successfully followed {username}!")
-    else:
-        db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
-        spotify.user_unfollow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
-        flash(f"Successfully unfollowed {username}!")
 
+    # Follow (or unfollow when already followed) user
+    follow_user(spotify, username)
 
+    # Redirect to home page
     return redirect("/home")
+
 
 @app.route('/settings')
 @login_required
 def settings():
+    """ Shows settings """
+
     return render_template("settings.html")
 
 @app.route("/changepassword", methods=["GET", "POST"])
@@ -422,21 +381,23 @@ def changeusername():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])
-        print(username)
-        # Ensure old password, new password and confirmation were submitted
+
+        # Select username of active user
+        username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])[0]['username']
+
+        # Ensure password and new username are submitted
         if not request.form.get("password") or not request.form.get("newusername"):
             return apology("Fill in all fields")
 
-        # Ensure that the old password is the same as currently stored in database
+        # Ensure that that password matches stored password
         elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("password")):
             return apology("Password wrong")
 
         # Ensure that old and new username are not the same
-        if request.form.get("newusername") == username[0]['username']:
+        if request.form.get("newusername") == username:
             return apology("Choose a new username")
 
-        # Update the users password
+        # Update the users username
         db.execute("UPDATE users SET username = :username WHERE userid = :userid", username=request.form.get("newusername"), userid=session["user_id"])
 
         # Redirect user to home page
@@ -450,54 +411,54 @@ def changeusername():
 
 @app.route("/share", methods=["GET", "POST"])
 @login_required
-def Share():
-    if request.method == 'POST':
-        value = request.form.get("sharedtext")
-        username = db.execute("SELECT username FROM users WHERE userid = ?", session["user_id"])[0]['username']
-        db.execute("INSERT into shared (userid, value, username, spotifyid) VALUES (:userid, :value, :username, :spotifyid)", userid=session["user_id"], value=value, username=username, spotifyid=request.form.get("trackid"))
-        flash("Shared!")
-        return redirect("/home")
-    else:
-        oauth = authentication.getAccessToken()[0]
-        spotify = spotipy.Spotify(auth=oauth)
+def share():
+    """ Users can share songs with their followers """
 
+    # User clicked the submit button
+    if request.method == 'POST':
+
+        # Share the song
+        share_post()
+        flash("Shared!")
+
+        # Redirect to home page
+        return redirect("/home")
+
+    # User reached route via GET by clicking a 'share' button
+    else:
+
+        # Get Spotify OAuth token
+        spotify = authorization.getSpotipy()
+
+        # Get details from song that is shared
         track = spotify.track(request.args.get("share"))
         artists = [artist['name'] for artist in track['artists']]
+
+        # Render page where user can share the song with a custom message
         return render_template("share.html", track=track, artists=artists)
 
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    oauth = authentication.getAccessToken()[0]
-    spotify = spotipy.Spotify(auth=oauth)
+    """ Gets a profile of a user with their listening statistics """
 
-    username = request.form.get("username")
-    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=username)[0]['userid']
-    following = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session["user_id"])
-    following = [user['followeduserid'] for user in following]
-    top_artists = db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=userid)
-    top_tracks = db.execute ("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=userid)
-    top_genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=userid)
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
 
-    genres = []
-    for genre in top_genres[0]:
-        genres.append(top_genres[0][genre])
+    print(request.form.get("username"))
 
-    artists = []
-    for artist in top_artists[0]:
-        artiest = spotify.artist(top_artists[0][artist])
-        artists.append((artiest['name'], artiest['images'][0]['url']))
+    # Get userid of the clicked user
+    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=request.form.get('username'))[0]['userid']
 
-    albums = []
-    for liedje in top_tracks[0]:
-        nummer = spotify.track(top_tracks[0][liedje])
-        albums.append((nummer['album']['artists'][0]['name'], nummer['name'], nummer['album']['images'][0]['url']))
+    # Get users that are followed by active user
+    following = get_following()
 
-    profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
+    # Let the function know this is the profile of an other user
+    profile = 'other'
 
-    if request.method == "GET":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=albums,
-        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
-    elif request.method == "POST":
-        return render_template("profile.html", gebruikersnaam=username, top_tracks=albums,
-        top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
+    # Get statistics from the user
+    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, None, userid, profile)
+
+    # Show statistics
+    return render_template("profile.html", username=username, top_tracks=tracks,
+    top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
