@@ -196,28 +196,37 @@ def playlist():
     # Get Spotify OAuth token
     spotify = authorization.getSpotipy()
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    if request.method == "GET":
+    # User reached route via GET (as by clicking a link or via redirect) or via selecting tracks&artists as dependent variable
+    if request.method == "GET" or request.form['action'] == 'tracks&artists':
 
         # Define globals to use later
         global tracks
         global track_ids
 
         # Generate a personal playlist
-        tracks, track_ids = generate_playlist(spotify)
+        tracks, track_ids, dependent = generate_playlist(spotify,'both')
 
-        # Show template with playlist
-        return render_template("playlist.html", titles=tracks)
+    elif request.form['action'] == 'tracks':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'tracks')
+
+    elif request.form['action'] == 'artists':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'artists')
 
     # When clicked on 'export playlist'
-    else:
+    elif request.form['action'] == 'otherpage':
 
-        # Export playlist to Spotify
+        return render_template("spotify_add.html")
+
+            # Show template with the same playlist again
+    elif request.form['action'] == 'addSpotify':
+                # Export playlist to Spotify
         export_playlist(spotify, track_ids)
-        flash("Added to Spotify!")
-
-        # Show template with the same playlist again
-        return render_template("playlist.html", titles=tracks)
+            # Show template with playlist
+        return render_template("playlist.html", titles=tracks, alert='on')
+    # Show template with playlist
+    return render_template("playlist.html", titles=tracks, dependent=dependent)
 
 
 @app.route("/logout")

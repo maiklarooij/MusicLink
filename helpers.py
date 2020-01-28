@@ -4,6 +4,7 @@ from collections import Counter
 from cs50 import SQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+from random import shuffle
 
 import os
 import authorization
@@ -166,21 +167,40 @@ def search_spotify(spotify, input, searchtype):
     return searchresults
 
 
-def generate_playlist(spotify):
+def generate_playlist(spotify, dependent):
+    if dependent == 'tracks':
+        # Get users top 5 tracks
+        tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations = spotify.recommendations(seed_tracks=tracks, limit=30)['tracks']
 
-    # Get users top 5 tracks
-    tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
-    recommendations = spotify.recommendations(seed_tracks=tracks, limit=30)['tracks']
+    elif dependent == 'artists':
+
+        # Get users top 5 artists
+        artists = list(db.execute("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations = spotify.recommendations(seed_artists=artists, limit=30)['tracks']
+    else:
+        # Get users top 5 tracks
+        tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations_a = spotify.recommendations(seed_tracks=tracks, limit=15)['tracks']
+
+        # Get users top 5 artists
+        artists = list(db.execute("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations_b = spotify.recommendations(seed_artists=artists, limit=15)['tracks']
+        recommendations = recommendations_a + recommendations_b
+        shuffle(recommendations)
     titles = [{'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']} for recommendation in recommendations]
     track_ids = [recommendation['id'] for recommendation in recommendations]
-    return titles, track_ids
+    return titles, track_ids, dependent
 
 
 def export_playlist(spotify, track_ids):
 
     spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
-    today = date.today().strftime("%d/%m/%Y")
-    name = 'MusicLink_'+ today
+    name = request.form.get("playlistName")
+    if not name:
+        today = date.today().strftime("%d/%m/%Y")
+        name = 'MusicLink_'+ today
+
     playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
     spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=track_ids)
 
