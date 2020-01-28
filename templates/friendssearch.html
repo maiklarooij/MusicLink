@@ -24,9 +24,9 @@
                     <div class="col-" style="display: table-cell; vertical-align: center;">
                         <form action="/follow" method="post">
                         {% if result['userid'] in following %}
-                            <button type="submit" class="btn btn-success btn-sm" value="{{ result['username'] }}" name='follow'>Unfollow</button>
+                            <button type="submit" class="btn btn-light text-white btn-sm buttons" value="{{ result['username'] }}" name='follow'>Unfollow</button>
                         {% else %}
-                            <button type="submit" class="btn btn-outline-success btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
+                            <button type="submit" class="btn btn-outline-light buttons-outline btn-sm" value="{{ result['username'] }}" name='follow'>Follow</button>
                         {% endif %}
                     </form>
                     </div>

@@ -40,32 +40,39 @@ def login_required(f):
     return decorated_function
 
 def update_database_top(spotify):
+    """ Updates database with top tracks, artists and genres for active user """
 
+    # Store short term top artists and tracks
     top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='short_term')["items"]
+    top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='short_term')["items"]
 
+    # When there are not enough short term artists, use medium or long term instead
     if len(top_artists) < 5:
         top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='medium_term')["items"]
         if len(top_artists) < 5:
             top_artists = spotify.current_user_top_artists(limit=20, offset=0, time_range='long_term')["items"]
 
-    top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='short_term')["items"]
-
+    # When there are not enough short term tracks, use medium or long term instead
     if len(top_tracks) < 5:
         top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='medium_term')["items"]
         if len(top_tracks) < 5:
             top_tracks = spotify.current_user_top_tracks(limit=5, offset=0, time_range='long_term')["items"]
 
+    # Store all genres linked to top 20 artists
     genrelists = [artist["genres"] for artist in top_artists]
     genres = []
     for genrelist in genrelists:
         for genre in genrelist:
             genres.append(genre)
 
+    # Filter to only the 3 genres that are most common
     genres = [genre[0] for genre in Counter(genres).most_common(3)]
 
+    # Get the track and artist id's to store in database
     top_artists = [artist["id"] for artist in top_artists][:5]
     top_tracks = [track["id"] for track in top_tracks]
 
+    # Store the top tracks, artists and genres in 'top' table in database
     db.execute("UPDATE top SET artist1 = :artist1, artist2 = :artist2, artist3 = :artist3, artist4 = :artist4, artist5 = :artist5, " \
                 "track1 = :track1, track2 = :track2, track3 = :track3, track4 = :track4, track5 = :track5, " \
                 "genre1 = :genre1, genre2 = :genre2, genre3 = :genre3 " \
@@ -75,99 +82,138 @@ def update_database_top(spotify):
                 genre1=genres[0], genre2=genres[1], genre3=genres[2], userid=session["user_id"])
 
 def get_following():
+    """ Get a list of users followed by active user """
 
+    # Get followed users from database
     followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid", userid=session['user_id'])
 
+    # Create an empty list for when there are no users followed
     following = []
+
+    # Fill the list with id's of followed users
     if len(followinglist) != 0:
         following = [followed['followeduserid'] for followed in followinglist]
 
-
+    # Return the list of followed users
     return following
 
 def get_friends_recommendations(spotify, following):
+    """ Gets track recommendations based on followed users top tracks """
 
+    # Create an empty list for when there are no users followed
     tracks = []
 
     if len(following) != 0:
+
+        # Fill list with five top tracks of every followed user
         for userid in following:
             for i in range(1, 6):
                 track = "track" + str(i)
                 tracks.append(db.execute("SELECT " + track  + " FROM top WHERE userid = :userid", userid=userid)[0][track])
 
+        # Get recommendations from Spotify based on five random tracks of track list
         recommendations = spotify.recommendations(seed_tracks=random.sample(tracks, 5), limit=10)['tracks']
 
+        # For easy use, fill a list with info about the tracks, such as name, artists, image and a Spotify link
         tracks = []
         for recommendation in recommendations:
             tracks.append({'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']})
 
+    # Return the recommendations
     return tracks
 
 
 def get_feed(spotify, following):
+    """ Get all shared messages from followed users to show on feed """
+
+    # Use the list with followed users and append own id to also show on feed
     following.append(session["user_id"])
 
+    # Get all messages
     messages = db.execute("SELECT * FROM shared")
+
+    # Filter messages to only show messages from followed users and active user
     feed = []
     for message in messages:
         if message['userid'] in following:
             feed.append(message)
 
+    # Make sure to return track info and profile picture for every message in feed
     for message in feed:
         message['trackinfo'] = spotify.track(message['spotifyid'])
         message['profilepic'] = db.execute("SELECT profilepic FROM users WHERE userid = :userid", userid=message['userid'])[0]['profilepic']
+
+    # Sort feed to show latest posts first
     feed = sorted(feed, key=lambda x: x['time'], reverse=True)
 
+    # Return messages
     return feed
 
 
 def update_profilepic(spotify):
+    """ Updates profile picture for active user """
+
+    # Use profile picture from Spotify
     profilepic = spotify.current_user()["images"]
+
+    # When user has no profile picture on Spotify, use a stock one instead. Else, use the one from Spotify
     if len(profilepic) == 0:
         profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
     else:
         profilepic = profilepic[0]['url']
 
+    # Store profile picture in database
     db.execute("UPDATE users SET profilepic = :profilepic WHERE userid = :userid", profilepic=profilepic, userid=session["user_id"])
 
 
 def register_user(spotify):
-    spotify_id = spotify.current_user()["id"]
+    """ Stores new user in database """
 
+    # Get Spotify id and profile picture to store in database
+    spotify_id = spotify.current_user()["id"]
     profilepic = spotify.current_user()["images"]
 
+    # When user has no profile picture on Spotify, use a stock one instead. Else, use the one from Spotify
     if len(profilepic) == 0:
         profilepic = "https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png"
     else:
         profilepic = profilepic[0]['url']
 
-
+    # Store all needed information about user in database
     db.execute("INSERT INTO users (username, hash, spotifyid, profilepic) VALUES (:username, :password, :spotifyid, :profilepic)",
                 username=request.form.get("username"), password=generate_password_hash(request.form.get("password"),
                 method='pbkdf2:sha256', salt_length=8), spotifyid=spotify_id, profilepic=profilepic)
 
+    # Get userid of registered user and assign it to session
     rows = db.execute("SELECT * FROM users WHERE username = :username",
                   username=request.form.get("username"))
-
     session["user_id"] = rows[0]["userid"]
 
+    # Create a database row in table 'top' for newly registered to store top tracks and artists
     db.execute("INSERT INTO top (userid) VALUES (:userid)", userid=session["user_id"])
 
 
 def search_spotify(spotify, input, searchtype):
+    """ Search Spotify database for tracks, artists or albums """
 
+    # Search for tracks if user selected to search for tracks
     if searchtype == 'track':
         searchresults = spotify.search(q='track:' + input, type=searchtype)
+
+    # Search for artists if user selected to search for artists
     elif searchtype == "artist":
         searchresults = spotify.search(q='artist:' + input, type=searchtype)
+
+    # Search for albums if user selected to search for albums
     elif searchtype == 'album':
         searchresults = spotify.search(q='album:' + input, type=searchtype)
 
+    # Return results
     return searchresults
 
 
 def generate_playlist(spotify):
-
+    """ Generate a personal playlist for active user based on tracks """
     # Get users top 5 tracks
     tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
     recommendations = spotify.recommendations(seed_tracks=tracks, limit=30)['tracks']

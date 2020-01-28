@@ -413,8 +413,6 @@ def profile():
     # Get Spotify OAuth token
     spotify = authorization.getSpotipy()
 
-    print(request.form.get("username"))
-
     # Get userid of the clicked user
     userid = db.execute("SELECT userid FROM users WHERE username=:username", username=request.form.get('username'))[0]['userid']
 
@@ -430,3 +428,27 @@ def profile():
     # Show statistics
     return render_template("profile.html", username=username, top_tracks=tracks,
     top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
+
+@app.route("/check", methods=["GET"])
+def check():
+
+    # Select all rows containing the inputted username, when zero, the username is not taken
+    if len(db.execute("SELECT * FROM users WHERE username = :username", username=request.args.get("username"))) == 0:
+        return jsonify(True)
+
+    else:
+        return jsonify(False)
+
+
+@app.route("/checklogin", methods=["GET"])
+def checkLogin():
+
+    # Query database for username
+    rows = db.execute("SELECT * FROM users WHERE username = :username",
+                       username=request.args.get("username"))
+
+    # Ensure username exists and password is correct
+    if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.args.get("password")):
+        return jsonify(False)
+    else:
+        return jsonify(True)

@@ -9,7 +9,7 @@
     <div class="row flex animate-bottom" style="align-items: center">
         <div class="col-sm"></div>
         <div class="col-">
-            <form action="/search" method="post" class="blocks" style="padding: 3em">
+            <form action="/search" method="post" class="blocks shadowdiv" style="padding: 3em; margin-top: 2em;">
                 <div class="form-group">
                     <input autocomplete="off" autofocus class="form-control" id="search" name="search" placeholder="Search for users..." type="text">
                 </div>
@@ -24,7 +24,7 @@
     {% if potential_friends %}
     <hr class="featurette-divider">
 
-    <div class="container marketing blocks animate-bottom">
+    <div class="container marketing blocks shadowdiv animate-bottom">
         <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
         <div class="row">
             {% if potential_friends|length < 3 %}
@@ -43,7 +43,7 @@
                     <p>Listening mostly to: {{ user['genre1'] }}, {{ user['genre2'] }} and {{ user['genre3'] }}</p>
                     <p>
                     <form action="/follow" method="post">
-                        <button type="submit" class="btn btn-outline-success btn-sm" value="{{ user['name'] }}" name='follow'>Follow</button>
+                        <button type="submit" class="btn btn-outline-success btn-sm buttons-outline" value="{{ user['name'] }}" name='follow'>Follow</button>
                     </form>
                     </p>
                 </div>
@@ -59,12 +59,15 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
+
         let input = document.querySelector('#search');
         input.onkeyup = function() {
             $.get('/friendssearch?q=' + input.value, function(data) {
                 document.querySelector('#results').innerHTML = data;
             });
         };
+
+
 
     </script>
 {% endblock %}

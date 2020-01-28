@@ -6,35 +6,72 @@
 
 {% block main %}
 
-    <form id="register" action="/register" method="post">
+    <form id="register" class='blocks' action="/register" method="post">
+        <h2>Register</h2>
+        <div class="row" id="alert1" class="alert" style="display: none">
+            <div class="col-sm"></div>
+            <div class="col-">
+                <div class="alert alert-warning fade show" role="alert" >
+                    <strong>Error!</strong> Username is already taken!
+                </div>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+        <div class="row" id="alert2" class="alert" style="display: none">
+            <div class="col-sm"></div>
+            <div class="col-">
+                <div class="alert alert-warning fade show" role="alert" >
+                    <strong>Error!</strong> Make sure passwords match!
+                </div>
+            </div>
+            <div class="col-sm"></div>
+        </div>
+
         <div class="form-group">
-          <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+            <input type="text" class="form-control" id="usernamereg" name="username" placeholder="Username" required>
+            <div class="invalid-feedback">Username is taken!</div>
         </div>
         <div class="form-group">
-          <input type="password" class="form-control" name="password" placeholder="Password" required>
+          <input type="password" class="form-control" name="password" id="pass1" placeholder="Password" required>
         </div>
         <div class="form-group">
-          <input type="password" class="form-control" name="confirmation" placeholder="Confirmation" required>
+          <input type="password" class="form-control" name="confirmation" id="pass2" placeholder="Confirmation" required>
         </div>
         <button class="btn btn-primary" id="submit" type="submit">Register</button>
     </form>
 
     <div class="form-popup bg-light shadowdiv" id="login">
-        <form action="/login" method="post">
+        <form action="/login" method="post" id="login">
             <h2>Login</h2>
+            <div class="row" id="alert3" class="alert" style="display: none">
+                <div class="col-sm"></div>
+                <div class="col-sm">
+                    <div class="alert alert-warning fade show" role="alert" >
+                        <strong>Error!</strong> Username and/or password incorrect!
+                    </div>
+                </div>
+                <div class="col-sm"></div>
+            </div>
             <div class="form-group">
                 <label for="username"><b>Username</b></label>
                 <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required>
             </div>
             <div class="form-group">
                 <label for="password"><b>Password</b></label>
-                <input type="password" class="form-control" placeholder="Enter password" name="password" required>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" name="password" required>
             </div>
 
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
   <script>
+
+    function removeAlert(){
+        document.querySelector(".alert").style.display = 'none';
+    }
 
     var opened = false;
     function openLogin(){
@@ -46,6 +83,75 @@
         }
         opened = !opened;
     }
+
+    function checkLogin() {
+        username = document.getElementById("username").value;
+        password = document.getElementById("password").value;
+        $.ajax({
+            type: "GET",
+            url: "/checklogin?username=" + username + "&password=" + password,
+            datatype: "json",
+            async: false,
+            success: function(data) {
+                available = data;
+            }
+        });
+        return available;
+    }
+
+    function checkUsername() {
+        input = document.getElementById("usernamereg").value;
+        $.ajax({
+            type: "GET",
+            url: "/check?username=" + input,
+            datatype: "json",
+            async: false,
+            success: function(data) {
+                available = data;
+            }
+        });
+        return available;
+    }
+
+    function checkPasswords() {
+        password1 = document.getElementById("pass1").value;
+        password2 = document.getElementById("pass2").value;
+        if (password1 != password2) {
+            return false;
+        }
+        return true;
+    }
+
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            $('#register').on('submit', function(event) {
+                if (checkUsername() == false) {
+                    document.getElementById("alert1").style.display = 'inline-block';
+                    document.getElementById("alert2").style.display = 'none';
+                    event.preventDefault();
+                }
+                else if (checkPasswords() == false) {
+                    document.getElementById("alert2").style.display = 'inline-block';
+                    document.getElementById("alert1").style.display = 'none';
+                    event.preventDefault();
+                }
+            });
+        }, false);
+    })();
+
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            $('#login').on('submit', function(event) {
+                if (checkLogin() == false) {
+                    document.getElementById("alert3").style.display = 'inline-block';
+                    event.preventDefault();
+                }
+            });
+        }, false);
+    })();
+
 
   </script>
 {% endblock %}

@@ -8,7 +8,7 @@
     <div class="row flex animate-bottom" style="align-items: center">
         <div class="col-sm"></div>
         <div class="col-">
-            <form action="/search" method="post" class="blocks" style="padding: 3em">
+            <form action="/search" method="post" class="blocks shadowdiv" style="padding: 3em; margin-top: 2em">
                 <div class="form-group">
                     <input autocomplete="off" autofocus class="form-control" id="search" name="search" placeholder="Search for..." type="text">
                     <select class="form-control" id="select" name="type">
@@ -29,9 +29,14 @@
         let searchtype = document.querySelector('#select');
 
         input.onkeyup = function() {
-            $.get('/searched?q=' + input.value + "&searchtype=" + searchtype.value, function(data) {
-            document.querySelector('.results').innerHTML = data;
-            });
+            if (input.value.length >= 3) {
+               $.get('/searched?q=' + input.value + "&searchtype=" + searchtype.value, function(data) {
+                document.querySelector('.results').innerHTML = data;
+                });
+            }
+            else {
+                document.querySelector('.results').innerHTML = "Give us a little bit more!";
+            }
         };
 
     </script>
