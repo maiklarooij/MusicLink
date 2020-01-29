@@ -456,12 +456,17 @@ def profile():
     # Let the function know this is the profile of an other user
     profile = 'other'
 
+    #selects all following and followed people by the account that is clicked
+    followinglist = db.execute("SELECT * FROM following WHERE followuserid=:id", id=userid)
+    followerslist = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=userid)
+
     # Get statistics from the user
     recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, None, userid, profile)
 
     # Show statistics
     return render_template("profile.html", username=username, top_tracks=tracks,
-    top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid)
+    top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid,
+    followers=len(followerslist), followinglist=len(followinglist))
 
 @app.route("/check", methods=["GET"])
 def check():
