@@ -62,7 +62,7 @@ database waar alle informatie over de users, top luistergegevens, gedeelde liedj
 
 - Bootstrap
 - Spotipy plugin
-- jquery
+- JQuery
 
 **Concurrerende websites**
 
