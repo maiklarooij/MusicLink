@@ -37,62 +37,6 @@ def start():
     return render_template("start.html")
 
 
-@app.route("/home", methods=["GET", "POST"])
-@login_required
-def home():
-    """ Displays the home page with a friends feed and track recommendations
-        based on who the user follows """
-
-    # Get Spotify OAuth token
-    spotify = authorization.getSpotipy()
-
-    # Store top 5 songs, artists and genres from user in database
-    update_database_top(spotify)
-
-    # Get a list of id's that the user is following
-    following = get_following()
-
-    # Get recommendations based on following users
-    recommendations = get_friends_recommendations(spotify, following)
-
-    # Get the shared messages from people the user follows
-    feed = get_feed(spotify, following)
-    # Render home template
-    return render_template("home.html", recommendations=recommendations, feed=feed)
-
-
-@app.route("/authorise", methods=["POST", "GET"])
-def authorise():
-    """ Gets Spotify authorisation """
-
-    response = authorization.getUser()
-
-    # Redirect to callback
-    return redirect(response)
-
-@app.route('/callback')
-def callback():
-    """ Redirected to after Spotify authorisation, redirects to home or register page """
-
-    # Get Spotify user token
-    authorization.getUserToken(request.args['code'])
-
-    # If there is someone logged in
-    if session.get("user_id") != None:
-
-        # Get Spotify OAuth token
-        spotify = authorization.getSpotipy()
-
-        # Update profilepic with photo from Spotify
-        update_profilepic(spotify)
-
-        # Redirect to home
-        return redirect("/home")
-
-    # Else if no one is logged in, redirect to register a new user
-    else:
-        return redirect("/register")
-
 @app.route('/register', methods=["POST", "GET"])
 def register():
     """ Register new user """
@@ -106,7 +50,7 @@ def register():
 
         # Ensure that the username is not taken
         if len(db.execute("SELECT * FROM users WHERE username = :username",
-            username=request.form.get("username"))) != 0:
+                           username=request.form.get("username"))) != 0:
             return apology("username already exists")
         # Get Spotify OAuth token
         spotify = authorization.getSpotipy()
@@ -120,6 +64,7 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -158,6 +103,73 @@ def login():
         return render_template("login.html")
 
 
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    session.clear()
+
+    return redirect("/")
+
+
+@app.route("/authorise", methods=["POST", "GET"])
+def authorise():
+    """ Gets Spotify authorisation """
+
+    response = authorization.getUser()
+
+    # Redirect to callback
+    return redirect(response)
+
+
+@app.route('/callback')
+def callback():
+    """ Redirected to after Spotify authorisation, redirects to home or register page """
+
+    # Get Spotify user token
+    authorization.getUserToken(request.args['code'])
+
+    # If there is someone logged in
+    if session.get("user_id") != None:
+
+        # Get Spotify OAuth token
+        spotify = authorization.getSpotipy()
+
+        # Update profilepic with photo from Spotify
+        update_profilepic(spotify)
+
+        # Redirect to home
+        return redirect("/home")
+
+    # Else if no one is logged in, redirect to register a new user
+    else:
+        return redirect("/register")
+
+
+@app.route("/home", methods=["GET", "POST"])
+@login_required
+def home():
+    """ Displays the home page with a friends feed and track recommendations
+        based on who the user follows """
+
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
+
+    # Store top 5 songs, artists and genres from user in database
+    update_database_top(spotify)
+
+    # Get a list of id's that the user is following
+    following = get_following()
+
+    # Get recommendations based on following users
+    recommendations = get_friends_recommendations(spotify, following)
+
+    # Get the shared messages from people the user follows
+    feed = get_feed(spotify, following)
+    # Render home template
+    return render_template("home.html", recommendations=recommendations, feed=feed)
+
+
 @app.route('/search', methods=["GET"])
 @login_required
 def search():
@@ -165,6 +177,7 @@ def search():
 
     # Show search template
     return render_template("search.html")
+
 
 @app.route('/searched', methods=["GET"])
 @login_required
@@ -203,7 +216,7 @@ def playlist():
         global track_ids
 
         # Generate a personal playlist
-        tracks, track_ids, dependent = generate_playlist(spotify,'both')
+        tracks, track_ids, dependent = generate_playlist(spotify, 'both')
 
     elif request.form['action'] == 'tracks':
         # Generate a personal playlist
@@ -231,14 +244,6 @@ def playlist():
     return render_template("playlist.html", titles=tracks, dependent=dependent)
 
 
-@app.route("/logout")
-def logout():
-    """Log user out"""
-
-    session.clear()
-
-    return redirect("/")
-
 @app.route('/ownprofile', methods=["GET", "POST"])
 @login_required
 def ownprofile():
@@ -265,22 +270,59 @@ def ownprofile():
 
     # Render template which shows personal statistics
     return render_template("ownprofile.html", username=username, following=len(following), followers=len(followers),
-    top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term, profilepic=profilepic)
+                            top_tracks=tracks, top_artists=artists, genres=genres, recent=recent,
+                            term=term, profilepic=profilepic)
 
 
-@app.route('/friends', methods=["GET"])
+@app.route("/termchange", methods=["GET"])
+def termchange():
+    """ Get statistics when there is a term change """
+
+    # Get user chosen term
+    term = request.args.get("term")
+
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
+
+    # Let the function know this is the current users profile
+    profile = 'own'
+
+    # Get statistics from Spotify
+    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
+
+    # Render template which shows personal statistics
+    return render_template("termchange.html", top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term)
+
+
+@app.route("/profile", methods=["GET", "POST"])
 @login_required
-def friends():
-    """ Find and follow users """
+def profile():
+    """ Gets a profile of a user with their listening statistics """
+
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
+
+    # Get userid of the clicked user
+    userid = db.execute("SELECT userid FROM users WHERE username=:username",
+                         username=request.form.get('username'))[0]['userid']
 
     # Get users that are followed by active user
     following = get_following()
 
-    # Generate a list of potential friends based on genre
-    potential_friends = get_potential_friends(following)
+    # Let the function know this is the profile of an other user
+    profile = 'other'
 
-    # Render template friends
-    return render_template("friends.html", potential_friends=potential_friends, following=following)
+    # Selects all following and followed people by the account that is clicked
+    followinglist = db.execute("SELECT * FROM following WHERE followuserid=:id", id=userid)
+    followerslist = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=userid)
+
+    # Get statistics from the user
+    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, None, userid, profile)
+
+    # Show statistics
+    return render_template("profile.html", username=username, top_tracks=tracks,
+           top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid,
+           followers=len(followerslist), followinglist=len(followinglist))
 
 
 @app.route('/followinglist', methods=["GET"])
@@ -292,7 +334,8 @@ def followinglist():
     following = get_following()
 
     # Get all followed users
-    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id",
+                                id=session["user_id"])
 
     # Get information from followed users
     users = []
@@ -311,7 +354,8 @@ def followerslist():
     following = get_following()
 
     # Get a list of users that follow active user
-    followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id", id=session["user_id"])
+    followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id",
+                                id=session["user_id"])
 
     # Get information from followers
     users = []
@@ -320,6 +364,22 @@ def followerslist():
 
     # Return followers
     return render_template("followers.html", followerslist=users, following=following)
+
+
+@app.route('/friends', methods=["GET"])
+@login_required
+def friends():
+    """ Find and follow users """
+
+    # Get users that are followed by active user
+    following = get_following()
+
+    # Generate a list of potential friends based on genre
+    potential_friends = get_potential_friends(following)
+
+    # Render template friends
+    return render_template("friends.html", potential_friends=potential_friends, following=following)
+
 
 @app.route('/friendssearch', methods=["GET"])
 @login_required
@@ -360,6 +420,7 @@ def settings():
 
     return render_template("settings.html")
 
+
 @app.route("/changepassword", methods=["GET", "POST"])
 @login_required
 def changepassword():
@@ -373,7 +434,8 @@ def changepassword():
             return apology("fill in all fields")
 
         # Ensure that the old password is the same as currently stored in database
-        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("oldpass")):
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid",
+                                                 userid=session["user_id"])[0]["hash"], request.form.get("oldpass")):
             return apology("old password wrong")
 
         # Ensure that old and new password are not the same
@@ -394,6 +456,7 @@ def changepassword():
     else:
         return render_template("changepassword.html")
 
+
 @app.route("/changeusername", methods=["GET", "POST"])
 @login_required
 def changeusername():
@@ -410,7 +473,8 @@ def changeusername():
             return apology("Fill in all fields")
 
         # Ensure that that password matches stored password
-        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid", userid=session["user_id"])[0]["hash"], request.form.get("password")):
+        elif not check_password_hash(db.execute("SELECT hash FROM users WHERE userid = :userid",
+                                                 userid=session["user_id"])[0]["hash"], request.form.get("password")):
             return apology("Password wrong")
 
         # Ensure that old and new username are not the same
@@ -418,7 +482,8 @@ def changeusername():
             return apology("Choose a new username")
 
         # Update the users username
-        db.execute("UPDATE users SET username = :username WHERE userid = :userid", username=request.form.get("newusername"), userid=session["user_id"])
+        db.execute("UPDATE users SET username = :username WHERE userid = :userid",
+                    username=request.form.get("newusername"), userid=session["user_id"])
 
         # Redirect user to home page
         return redirect("/ownprofile")
@@ -426,7 +491,6 @@ def changeusername():
     # User reached route via GET (as by clicking a link or via redirect)
     elif request.method == "GET":
         return render_template("changeusername.html")
-
 
 
 @app.route("/share", methods=["GET", "POST"])
@@ -456,34 +520,6 @@ def share():
         # Render page where user can share the song with a custom message
         return render_template("share.html", track=track, artists=artists)
 
-@app.route("/profile", methods=["GET", "POST"])
-@login_required
-def profile():
-    """ Gets a profile of a user with their listening statistics """
-
-    # Get Spotify OAuth token
-    spotify = authorization.getSpotipy()
-
-    # Get userid of the clicked user
-    userid = db.execute("SELECT userid FROM users WHERE username=:username", username=request.form.get('username'))[0]['userid']
-
-    # Get users that are followed by active user
-    following = get_following()
-
-    # Let the function know this is the profile of an other user
-    profile = 'other'
-
-    # Selects all following and followed people by the account that is clicked
-    followinglist = db.execute("SELECT * FROM following WHERE followuserid=:id", id=userid)
-    followerslist = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=userid)
-
-    # Get statistics from the user
-    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, None, userid, profile)
-
-    # Show statistics
-    return render_template("profile.html", username=username, top_tracks=tracks,
-    top_artists=artists, genres=genres, profilepic=profilepic, following=following, userid=userid,
-    followers=len(followerslist), followinglist=len(followinglist))
 
 @app.route("/check", methods=["GET"])
 def check():
@@ -510,23 +546,3 @@ def checkLogin():
         return jsonify(False)
     else:
         return jsonify(True)
-
-
-@app.route("/termchange", methods=["GET"])
-def termchange():
-    """ Get statistics when there is a term change """
-
-    # Get user chosen term
-    term = request.args.get("term")
-
-    # Get Spotify OAuth token
-    spotify = authorization.getSpotipy()
-
-    # Let the function know this is the current users profile
-    profile = 'own'
-
-    # Get statistics from Spotify
-    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
-
-    # Render template which shows personal statistics
-    return render_template("termchange.html", top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term)
