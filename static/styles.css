@@ -1,10 +1,19 @@
 /* Things that apply on whole site */
 
+@font-face {
+    font-family: 'one_dayregular';
+    src: url('oneday-webfont.woff2') format('woff2'),
+         url('oneday-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 #brand {
     background: -webkit-linear-gradient(90deg, rgba(131,58,180,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-family: papyrus;
+    font-family: one_dayregular;
     font-size: 200%;
 }
 
@@ -12,7 +21,7 @@
     background: -webkit-linear-gradient(90deg, rgba(131,58,180,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-family: papyrus;
+    font-family: one_dayregular;
     font-size: 400%;
 }
 
@@ -35,7 +44,7 @@ main .form-control
 }
 
 #musiclink {
-    font-family: papyrus;
+    font-family: one_dayregular;
 }
 
 
