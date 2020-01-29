@@ -259,8 +259,10 @@ def ownprofile():
     # Get statistics from Spotify
     recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
 
+    # Get following and followers of active user
     following = db.execute("SELECT * FROM following WHERE followuserid=:id", id=session["user_id"])
     followers = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=session["user_id"])
+
     # Render template which shows personal statistics
     return render_template("ownprofile.html", username=username, following=len(following), followers=len(followers),
     top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term, profilepic=profilepic)
@@ -471,7 +473,7 @@ def profile():
     # Let the function know this is the profile of an other user
     profile = 'other'
 
-    #selects all following and followed people by the account that is clicked
+    # Selects all following and followed people by the account that is clicked
     followinglist = db.execute("SELECT * FROM following WHERE followuserid=:id", id=userid)
     followerslist = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=userid)
 
