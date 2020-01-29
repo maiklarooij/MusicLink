@@ -196,28 +196,40 @@ def playlist():
     # Get Spotify OAuth token
     spotify = authorization.getSpotipy()
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    if request.method == "GET":
+    # User reached route via GET (as by clicking a link or via redirect) or via selecting tracks&artists as dependent variable
+    if request.method == "GET" or request.form['action'] == 'tracks&artists':
 
         # Define globals to use later
         global tracks
         global track_ids
 
         # Generate a personal playlist
-        tracks, track_ids = generate_playlist(spotify)
+        tracks, track_ids, dependent = generate_playlist(spotify,'both')
 
-        # Show template with playlist
-        return render_template("playlist.html", titles=tracks)
+    elif request.form['action'] == 'tracks':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'tracks')
+
+    elif request.form['action'] == 'artists':
+        # Generate a personal playlist
+        tracks, track_ids, dependent = generate_playlist(spotify, 'artists')
 
     # When clicked on 'export playlist'
-    else:
+    elif request.form['action'] == 'otherpage':
+
+        return render_template("spotify_add.html", tracks=random.sample(tracks, 3))
+
+    # Show template with the same playlist again
+    elif request.form['action'] == 'addSpotify':
 
         # Export playlist to Spotify
         export_playlist(spotify, track_ids)
-        flash("Added to Spotify!")
 
-        # Show template with the same playlist again
-        return render_template("playlist.html", titles=tracks)
+        # Show template with playlist
+        return render_template("playlist.html", titles=tracks, alert='on')
+
+    # Show template with playlist
+    return render_template("playlist.html", titles=tracks, dependent=dependent)
 
 
 @app.route("/logout")
@@ -247,9 +259,10 @@ def ownprofile():
 
     # Get statistics from Spotify
     recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
-
+    following = db.execute("SELECT * FROM following WHERE followuserid=:id", id=session["user_id"])
+    followers = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=session["user_id"])
     # Render template which shows personal statistics
-    return render_template("ownprofile.html", username=username,
+    return render_template("ownprofile.html", username=username, following=len(following), followers=len(followers),
     top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term, profilepic=profilepic)
 
 
@@ -268,6 +281,28 @@ def friends():
     return render_template("friends.html", potential_friends=potential_friends, following=following)
 
 
+@app.route('/followinglist', methods=["GET"])
+@login_required
+def followinglist():
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+    users = []
+    for user in followinglist:
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followeduserid'])[0])
+    return render_template("following.html", followinglist=users)
+
+@app.route('/followerslist', methods=["GET"])
+@login_required
+def followerslist():
+    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+    following = [user['followeduserid'] for user in followinglist]
+
+    followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id", id=session["user_id"])
+    users = []
+    for user in followerslist:
+        users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followuserid'])[0])
+
+    return render_template("followers.html", followerslist=users, following=following)
+
 @app.route('/friendssearch', methods=["GET"])
 @login_required
 def friendssearch():
@@ -283,7 +318,7 @@ def friendssearch():
     return render_template("friendssearch.html", results=results, following=following)
 
 
-@app.route('/follow', methods=["POST"])
+@app.route('/follow', methods=["GET"])
 @login_required
 def follow():
     """ (Un)follow user """
@@ -292,13 +327,12 @@ def follow():
     spotify = authorization.getSpotipy()
 
     # Get id from clicked user
-    username = request.form.get('follow')
+    username = request.args.get('username')
 
     # Follow (or unfollow when already followed) user
     follow_user(spotify, username)
 
-    # Redirect to home page
-    return redirect("/home")
+    return jsonify(True)
 
 
 @app.route('/settings')
@@ -431,6 +465,7 @@ def profile():
 
 @app.route("/check", methods=["GET"])
 def check():
+    """ Checks if the chosen username is available """
 
     # Select all rows containing the inputted username, when zero, the username is not taken
     if len(db.execute("SELECT * FROM users WHERE username = :username", username=request.args.get("username"))) == 0:
@@ -442,6 +477,7 @@ def check():
 
 @app.route("/checklogin", methods=["GET"])
 def checkLogin():
+    """ Checks if the login information is correct """
 
     # Query database for username
     rows = db.execute("SELECT * FROM users WHERE username = :username",
@@ -452,3 +488,23 @@ def checkLogin():
         return jsonify(False)
     else:
         return jsonify(True)
+
+
+@app.route("/termchange", methods=["GET"])
+def termchange():
+    """ Get statistics when there is a term change """
+
+    # Get user chosen term
+    term = request.args.get("term")
+
+    # Get Spotify OAuth token
+    spotify = authorization.getSpotipy()
+
+    # Let the function know this is the current users profile
+    profile = 'own'
+
+    # Get statistics from Spotify
+    recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
+
+    # Render template which shows personal statistics
+    return render_template("termchange.html", top_tracks=tracks, top_artists=artists, genres=genres, recent=recent, term=term)

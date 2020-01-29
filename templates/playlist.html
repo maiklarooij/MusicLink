@@ -6,16 +6,49 @@
 
 {% block main %}
 
-<div id = "alert_placeholder"></div>
+    <div class="blocks animate-bottom" style="padding: 2em">
+{% if alert %}
+    <header class="alert">
+                <div class="alert alert-primary border text-center" role="alert">
+                    Added to Spotify!
+                </div>
+    </header>
+{% endif %}
+
     <div class="blocks animate-bottom shadowdiv" style="padding: 2em; margin-top: 2em">
         <div class="row flex" style="align-items: center">
+    <div>
+    <b>What should the playlist be based on?</b>
+    <form action="/playlist" method="post">
+        <div class="form-group">
+            <select class="form-control" name="action" onchange="this.form.submit();">
+                {% if dependent == "tracks" %}
+                    <option value="tracks" selected>Favorite tracks</option>
+                    <option value="artists">Favorite artists</option>
+                    <option value="tracks&artists">Favorite tracks & artists</option>
+                {% elif dependent == "artists" %}
+                    <option value="tracks">Favorite tracks</option>
+                    <option value="artists"  selected>Favorite artists</option>
+                    <option value="tracks&artists">Favorite tracks & artists</option>
+                {% else %}
+                    <option value="tracks">Favorite tracks</option>
+                    <option value="artists">Favorite artists</option>
+                    <option value="tracks&artists" selected>Favorite tracks & artists</option>
+                {% endif %}
+            </select>
+        </div>
+    </form>
+    </div>
             <div class="col" style="margin-left: 2em">
                 <h3>Your personal playlist</h3>
                 <h5>We just generated a brand new playlist just for you!</h5>
             </div>
             <div class="button-right" class="col-">
                 <form action="/playlist" method="post" id="form">
-                    <button class="btn btn-light text-white buttons btn-lg" type="submit" name="songs" style="margin-right: 1em">Add to Spotify</button>
+                    <button class="btn btn-light text-white buttons btn-lg" type="submit" name="action" value="otherpage" style="margin-right: 1em">Add to Spotify</button>
+                </form>
+                <form action="/playlist" method="get" id="form" style="margin-top: 1em">
+                    <button class="btn btn-light buttons-outline btn-lg" type="submit" style="margin-right: 1em">Generate another one</button>
                 </form>
             </div>
         </div>

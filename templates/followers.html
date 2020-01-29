@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Settings
+{% endblock %}
+
+{% block main %}
+    <h2><b>Followers</b></h2>
+    </p>
+    <div style='float:center; display: flex; justify-content: center;'>
+        <ul class="list-group list-group-flush" style="width: 40%;">
+            {% for user in followerslist %}
+            <li class="list-group-item"><img src= {{ user['profilepic'] }} alt="nummer" width="35" height="35" align="left">
+            <div style='float:left; width:35%'>
+                <form action="/profile" method="POST">
+                    <input type="submit" class="btn default" value="{{ user['username'] }}" name='username'
+                    style="background-color: inherit; font-size: 20px; font-weight: bold; margin-left: 150px;">
+                </form>
+            </div>
+            <form action="/follow" method="post" style='float:right;'>
+                {% if user['userid'] in following %}
+                    <button type="submit" class="btn btn-success btn-sm" value="{{ user['username'] }}" name='follow'>Unfollow</button>
+                {% else %}
+                    <button type="submit" class="btn btn-outline-success btn-sm" value="{{ user['username'] }}" name='follow'>Follow</button>
+                {% endif %}
+            </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

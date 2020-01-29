@@ -12,13 +12,11 @@
                 <div class="center-cropped" style="background-image: url({{ profilepic }});"></div>
                 <h3>{{ username }}
                 <div>
-                    <form action="/follow" method="post">
-                        {% if userid in following %}
-                            <button type="submit" class="btn btn-success btn-sm" value="{{ username }}" name='follow'>Unfollow</button>
-                        {% else %}
-                            <button type="submit" class="btn btn-outline-success btn-sm" value="{{ username }}" name='follow'>Follow</button>
-                        {% endif %}
-                    </form>
+                    {% if userid in following %}
+                        <button type="submit" class="btn btn-light text-white btn-sm buttons" value="{{ username }}" onclick="changeButton(this)" name='follow'>Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-light buttons-outline btn-sm" value="{{ username }}" onclick="changeButton(this)" name='follow'>Follow</button>
+                    {% endif %}
                 </div>
             </div>
             <div class="col"></div>
@@ -60,4 +58,29 @@
         </div>
     </div>
 
+    <script>
+        function changeButton(button) {
+            console.log(button.value)
+            username = button.value;
+            $.ajax({
+                type: "GET",
+                url: "/follow?username=" + username,
+                datatype: "json",
+                async: false,
+                success: function(data) {
+                    console.log(data)
+                    if (data == true) {
+                        if (button.className == "btn btn-outline-light buttons-outline btn-sm") {
+                            button.innerHTML = "Unfollow";
+                            button.className = "btn btn-light text-white btn-sm buttons";
+                        }
+                        else {
+                            button.innerHTML = "Follow";
+                            button.className = "btn btn-outline-light buttons-outline btn-sm";
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 {% endblock %}

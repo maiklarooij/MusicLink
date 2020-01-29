@@ -42,9 +42,7 @@
                     </form>
                     <p>Listening mostly to: {{ user['genre1'] }}, {{ user['genre2'] }} and {{ user['genre3'] }}</p>
                     <p>
-                    <form action="/follow" method="post">
-                        <button type="submit" class="btn btn-outline-success btn-sm buttons-outline" value="{{ user['name'] }}" name='follow'>Follow</button>
-                    </form>
+                    <button type="submit" class="btn btn-outline-light buttons-outline btn-sm" value="{{ user['name'] }}" onclick="changeButton(this)" name='follow'>Follow</button>
                     </p>
                 </div>
 
@@ -68,6 +66,29 @@
         };
 
 
+        function changeButton(button) {
+            console.log(button.value)
+            username = button.value;
+            $.ajax({
+                type: "GET",
+                url: "/follow?username=" + username,
+                datatype: "json",
+                async: false,
+                success: function(data) {
+                    console.log(data)
+                    if (data == true) {
+                        if (button.className == "btn btn-outline-light buttons-outline btn-sm") {
+                            button.innerHTML = "Unfollow";
+                            button.className = "btn btn-light text-white btn-sm buttons";
+                        }
+                        else {
+                            button.innerHTML = "Follow";
+                            button.className = "btn btn-outline-light buttons-outline btn-sm";
+                        }
+                    }
+                }
+            });
+        }
 
     </script>
 {% endblock %}

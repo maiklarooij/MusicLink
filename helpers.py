@@ -4,6 +4,7 @@ from collections import Counter
 from cs50 import SQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
+from random import shuffle
 
 import os
 import authorization
@@ -212,27 +213,57 @@ def search_spotify(spotify, input, searchtype):
     return searchresults
 
 
-def generate_playlist(spotify):
-    """ Generate a personal playlist for active user based on tracks """
-    # Get users top 5 tracks
-    tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
-    recommendations = spotify.recommendations(seed_tracks=tracks, limit=30)['tracks']
+def generate_playlist(spotify, dependent):
+    """ Generate a personal playlist for active user based on tracks or artists based on a dependent the user chooses """
+
+    # Generate a different playlist based on what the user chooses
+    if dependent == 'tracks':
+        # Get users top 5 tracks
+        tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations = spotify.recommendations(seed_tracks=tracks, limit=30)['tracks']
+
+    elif dependent == 'artists':
+
+        # Get users top 5 artists
+        artists = list(db.execute("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations = spotify.recommendations(seed_artists=artists, limit=30)['tracks']
+    else:
+        # Get users top 5 tracks
+        tracks = list(db.execute("SELECT track1, track2, track3, track4, track5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations_a = spotify.recommendations(seed_tracks=tracks, limit=15)['tracks']
+
+        # Get users top 5 artists
+        artists = list(db.execute("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=session["user_id"])[0].values())
+        recommendations_b = spotify.recommendations(seed_artists=artists, limit=15)['tracks']
+        recommendations = recommendations_a + recommendations_b
+        shuffle(recommendations)
+
     titles = [{'name': recommendation['name'], 'artists': [artist['name'] for artist in recommendation['artists']], 'img': recommendation['album']['images'][0]['url'], 'link': recommendation['uri']} for recommendation in recommendations]
     track_ids = [recommendation['id'] for recommendation in recommendations]
-    return titles, track_ids
+    return titles, track_ids, dependent
 
 
 def export_playlist(spotify, track_ids):
+    """ Exports the generated playlist to the users Spotify """
 
+    # Get the Spotify id from active user
     spotifyid = db.execute("SELECT spotifyid FROM users where userid=:user_id", user_id=session["user_id"])[0]["spotifyid"]
-    today = date.today().strftime("%d/%m/%Y")
-    name = 'MusicLink_'+ today
+
+    # Use the name chosen by the user or use a standard name
+    name = request.form.get("playlistName")
+    if not name:
+        today = date.today().strftime("%d/%m/%Y")
+        name = 'MusicLink_'+ today
+
+    # Create a playlist and add the track ids
     playlist_id = spotify.user_playlist_create(user=spotifyid, name=name)['id']
     spotify.user_playlist_add_tracks(user=spotifyid, playlist_id=playlist_id, tracks=track_ids)
 
 
 def get_statistics(spotify, term, userid, profile):
+    """ Gets users listening statistics from Spotify """
 
+    # Get top artists, tracks and genres from database when the profile is not active users' profile
     if profile == 'other':
         recent_tracks = []
         top_artists = list(db.execute ("SELECT artist1, artist2, artist3, artist4, artist5 FROM top WHERE userid=:id", id=userid)[0].values())
@@ -240,80 +271,119 @@ def get_statistics(spotify, term, userid, profile):
         genres = list(db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=userid)[0].values())
         username = db.execute("SELECT username FROM users WHERE userid=:id", id=userid)[0]['username']
         profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=userid)[0]['profilepic']
+
+    # Get top artists, tracks and genres when the profile is active users' profile
     else:
         recent_tracks = spotify.current_user_recently_played(limit=6)['items']
         top_artists = [artist["id"] for artist in spotify.current_user_top_artists(limit=10, offset=0, time_range=term)["items"]]
         top_tracks = [track["id"] for track in spotify.current_user_top_tracks(limit=10, offset=0, time_range=term)["items"]]
         genres = db.execute ("SELECT genre1, genre2, genre3 FROM top WHERE userid=:id", id=session["user_id"])[0].values()
         username = db.execute("SELECT username FROM users WHERE userid=:id", id=session["user_id"])[0]['username']
-
         profilepic = db.execute("SELECT profilepic FROM users WHERE userid=:id", id=session["user_id"])[0]['profilepic']
 
-
+    # Get more information about recent tracks
     recent = []
     for track in recent_tracks:
         recent_track = spotify.track(track['track']['id'])
         recent.append((recent_track['album']['artists'][0]['name'], recent_track['name'], recent_track['album']['images'][0]['url']))
 
+    # Get more information about artists
     artists = []
     for artist in top_artists:
         fav_artist = spotify.artist(artist)
         artists.append((fav_artist['name'], fav_artist['images'][0]['url']))
 
+    # Get more information about top tracks
     tracks = []
     for track in top_tracks:
         fav_track = spotify.track(track)
         tracks.append((fav_track['album']['artists'][0]['name'], fav_track['name'], fav_track['album']['images'][0]['url']))
 
-
+    # Return all the data
     return recent, genres, artists, tracks, username, profilepic
 
 
 def get_potential_friends(following):
+    """ Returns a list of users that have genres in common with the active user """
 
+    # Get top 3 genres of active user
     genres = db.execute("SELECT genre1, genre2, genre3 FROM top WHERE userid = :userid", userid=session["user_id"])
 
+    # Get a list of users that have at least one top genre in common
     samegenreusers = db.execute("SELECT userid, genre1, genre2, genre3 FROM top WHERE genre1 = :genre1 OR genre2 = :genre1 OR genre3 = :genre1 OR genre1 = :genre2 OR genre2 = :genre2 OR genre3 = :genre2 OR genre1 = :genre3 or genre2 = :genre3 OR genre3 = :genre3",
                     genre1=genres[0]['genre1'], genre2=genres[0]['genre2'], genre3=genres[0]['genre3'])
 
+    # Remove active user and users that are already followed
     samegenreusers = [user for user in samegenreusers if user['userid'] != session["user_id"]]
     samegenreusers = [user for user in samegenreusers if user['userid'] not in following]
 
+    # Store a name and profile image of the users
     for user in samegenreusers:
         user['name'] = db.execute("SELECT username FROM users WHERE userid = :userid", userid=user['userid'])[0]['username']
         user['img'] = db.execute("SELECT profilepic FROM users WHERE userid = :userid", userid=user['userid'])[0]['profilepic']
 
+    # Make sure that there is a max of three randomly chosen returned users to show
     if len(samegenreusers) > 3:
         samegenreusers = random.sample(samegenreusers, 3)
 
+    # Return the list of users
     return samegenreusers
 
 
 def search_friends():
-    users = [user for user in db.execute("SELECT username, profilepic, userid FROM users")]
-    users.remove(db.execute("SELECT username, profilepic, userid FROM users WHERE userid=:userid", userid=session['user_id'])[0])
-    q = request.args.get("q")
-    results = [user for user in users if q if user['username'].upper().startswith(q.upper())]
+    """ Search all users by username """
 
+    # Get a list of all registered users
+    users = [user for user in db.execute("SELECT username, profilepic, userid FROM users")]
+
+    # Remove active user
+    users.remove(db.execute("SELECT username, profilepic, userid FROM users WHERE userid=:userid", userid=session['user_id'])[0])
+
+    # Get users input
+    search_query = request.args.get("q")
+
+    # Get users from database that start with users input
+    results = [user for user in users if search_query if user['username'].upper().startswith(search_query.upper())]
+
+    # Return the search results
     return results
 
 
 def follow_user(spotify, username):
+    """ Lets users follow or unfollow other users """
 
+    # Get the id of user that is followed
     usernameid = db.execute("SELECT userid FROM users WHERE username = :username", username=username)[0]['userid']
 
+    # If user doesn't follow the chosen user yet:
     if len(db.execute("SELECT followeduserid FROM following WHERE followuserid = :userid AND followeduserid = :followeduserid", userid=session['user_id'], followeduserid=usernameid)) == 0:
+
+        # Store both in database
         db.execute("INSERT INTO following (followuserid, followeduserid) VALUES (:userid, :followeduserid)", userid=session['user_id'], followeduserid=usernameid)
+
+        # Follow user on Spotify
         spotify.user_follow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
-        flash(f"Successfully followed {username}!")
+
+
+    # Else if user already is following the chosen user
     else:
+
+        # Delete both from database
         db.execute("DELETE FROM following WHERE followeduserid = :usernameid AND followuserid = :userid", usernameid=usernameid, userid=session['user_id'])
+
+        # Unfollow user on Spotify
         spotify.user_unfollow_users(ids=[db.execute("SELECT spotifyid FROM users WHERE userid= :followeduserid", followeduserid=usernameid)[0]['spotifyid']])
-        flash(f"Successfully unfollowed {username}!")
+
 
 
 def share_post():
+    """ Stores shared songs with custom messages in database """
 
+    # Get the typed message
     value = request.form.get("sharedtext")
+
+    # Get username from active user
     username = db.execute("SELECT username FROM users WHERE userid = :userid", userid=session["user_id"])[0]['username']
+
+    # Store the message with a Spotify id of the shared song
     db.execute("INSERT into shared (userid, value, username, spotifyid) VALUES (:userid, :value, :username, :spotifyid)", userid=session["user_id"], value=value, username=username, spotifyid=request.form.get("trackid"))

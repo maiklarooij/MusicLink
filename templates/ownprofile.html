@@ -19,10 +19,29 @@
             </div>
             <div class="col-sm"></div>
         </div>
+        <div class="row flex" style="align-items: center">
+        <div class="col-sm"></div>
+        <div class="col-" style="padding: 10px">
+            <div class="center-cropped" style="font-size: 20px;">{{ followers }} </br>
+                <form action="/followerslist">
+                    <input type="submit" class="btn default" value="followers" style="background-color: inherit; font-size: 20px;">
+                </form>
+            </div>
+        </div>
+        <div class="col-" style="padding: 10px">
+            <div class="center-cropped" style="font-size: 20px;">{{ following }}</br>
+                <form action="/followinglist">
+                    <input type="submit" class="btn default" value="following" style="background-color: inherit; font-size: 20px;">
+                </form>
+            </div>
+        </div>
+        <div class="col-sm"></div>
+    </div>
     <i><h4 style="margin-top: 1em">From what period do you want to see your statistics?</h4></i>
+
     <form action="/ownprofile" method="post">
         <div class="form-group">
-            <select class="form-control" name="term" onchange="this.form.submit();">
+            <select class="form-control" name="term" onchange="changeTerm(this)">
                 {% if term == "short_term" %}
                     <option value="short_term" selected>Last month</option>
                     <option value="medium_term">Last half year</option>
@@ -41,7 +60,7 @@
     </form>
     </div>
 
-    <div class="results">
+    <div class="results" id="first">
         <div class="row">
             <div class="col animate-bottom shadowdiv" style="margin-right: 1em; padding-top: 1em">
                 <b>Most listened songs</b>
@@ -86,10 +105,25 @@
         </div>
 
     </div>
-    <div class="clear"></div>
+
+    <div id="loading" style="display: none; margin-top: 3em">
+        <h2>Getting statistics, please wait!</h2>
     </div>
+    <div class="results" id="termchange"></div>
 
     <script>
+
+        function changeTerm(select) {
+            document.querySelector("#first").style.display = 'none'
+            document.querySelector("#termchange").style.display = 'none'
+            document.querySelector("#loading").style.display = 'block'
+            term = select.value
+            $.get('/termchange?term=' + term, function(data) {
+                document.querySelector("#loading").style.display = 'none'
+                document.querySelector('#termchange').innerHTML = data;
+                document.querySelector("#termchange").style.display = 'block'
+            });
+        }
 
     </script>
 {% endblock %}
