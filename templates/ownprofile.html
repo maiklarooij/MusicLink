@@ -113,15 +113,21 @@
 
     <script>
 
+        // Load new results based on the selected term
         function changeTerm(select) {
-            document.querySelector("#first").style.display = 'none'
-            document.querySelector("#termchange").style.display = 'none'
-            document.querySelector("#loading").style.display = 'block'
-            term = select.value
+            // Hide old results and display loading message
+            document.querySelector("#first").style.display = 'none';
+            document.querySelector("#termchange").style.display = 'none';
+            document.querySelector("#loading").style.display = 'block';
+
+            // Get users chosen term
+            term = select.value;
+
+            // Get results via JQuery get request
             $.get('/termchange?term=' + term, function(data) {
-                document.querySelector("#loading").style.display = 'none'
+                document.querySelector("#loading").style.display = 'none';
                 document.querySelector('#termchange').innerHTML = data;
-                document.querySelector("#termchange").style.display = 'block'
+                document.querySelector("#termchange").style.display = 'block';
             });
         }
 
