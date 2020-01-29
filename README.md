@@ -7,6 +7,8 @@
 Het is ontworpen om ten alle tijden statistieken van een gebruiker over meest geluisterde nummers, artiesten en genres op Spotify toegankelijk te maken voor iedereen.
 Door de gebruiksvriendelijke interface is het voor iedereen gemakkelijk zijn/haar muziek kennis uit te breiden en verbonden te zijn met de muziek van een ander
 
+![Screenshot MusicLink](doc/screenshot.png)
+
 ### Taakverdeling
 - Feed: Enzo
 - Search: Enzo, Maik
@@ -60,6 +62,7 @@ database waar alle informatie over de users, top luistergegevens, gedeelde liedj
 
 - Bootstrap
 - Spotipy plugin
+- jquery
 
 **Concurrerende websites**
 

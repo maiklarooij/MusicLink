@@ -1,7 +1,7 @@
 import os
 
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -437,7 +437,6 @@ def share():
 
         # Share the song
         share_post()
-        flash("Shared!")
 
         # Redirect to home page
         return redirect("/home")
