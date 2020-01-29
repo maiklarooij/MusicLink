@@ -6,6 +6,8 @@
 Het is ontworpen om ten alle tijden statistieken van een gebruiker over meest geluisterde nummers, artiesten en genres op Spotify toegankelijk te maken voor iedereen.
 Door de gebruiksvriendelijke interface is het voor iedereen gemakkelijk zijn/haar muziek kennis uit te breiden en verbonden te zijn met de muziek van een ander.
 
+![Screenshot MusicLink](doc/screenshot.png)
+
 ### Minimum Viable Product
 
 - Gebruikers moeten kunnen registreren en inloggen
