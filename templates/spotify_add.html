@@ -6,44 +6,42 @@
 
 {% block main %}
 
-<div class="row">
-    <div class="col-sm"></div>
-    <div class="col-sm blocks animate-bottom shadowdiv">
-        <h3>Add playlist to Spotify</h3>
-        <div>
-            {% for track in tracks %}
-                <img onmouseover="bigImg(this)" onmouseout="normalImg(this)" src="{{ track['img'] }}" style="width: 75px; margin: 10px">
-                <div id="hi" style="display: none">
-                    {{ track['name'] }}
-                </div>
-
-            {% endfor %}
-        </div>
-        <h5>Give your playlist a name:</h5>
-        <form name="theForm" action="/playlist" method="post">
-            <div style="margin-bottom: 1em; margin-top: 1em">
-                <input type="text" class="form-control"  name="playlistName" placeholder="My_MusicLink_Playlist">
+    <div class="row">
+        <div class="col-sm"></div>
+        <div class="col-sm blocks animate-bottom shadowdiv">
+            <h3>Add playlist to Spotify</h3>
+            <div>
+                {% for track in tracks %}
+                    <img onmouseover="bigImg(this)" onmouseout="normalImg(this)" src="{{ track['img'] }}" style="width: 75px; margin: 10px">
+                    <div id="hi" style="display: none">
+                        {{ track['name'] }}
+                    </div>
+                {% endfor %}
             </div>
-            <button class="btn btn-light text-white buttons btn-lg" name="action" value="addSpotify">Add to Spotify</button>
-        </form>
+            <h5>Give your playlist a name:</h5>
+            <form name="theForm" action="/playlist" method="post">
+                <div style="margin-bottom: 1em; margin-top: 1em">
+                    <input type="text" class="form-control"  name="playlistName" placeholder="My_MusicLink_Playlist">
+                </div>
+                <button class="btn btn-light text-white buttons btn-lg" name="action" value="addSpotify">Add to Spotify</button>
+            </form>
+        </div>
+        <div class="col-sm"></div>
     </div>
-    <div class="col-sm"></div>
-</div>
 
-<script>
+    <script>
 
-    function bigImg(x){
-        x.style.height = "100px";
-        x.style.width = "100px";
-    }
+        function bigImg(x){
+            x.style.height = "100px";
+            x.style.width = "100px";
+        }
 
-    function normalImg(x){
-        x.style.height = "75px";
-        x.style.width = "75px";
-    }
+        function normalImg(x){
+            x.style.height = "75px";
+            x.style.width = "75px";
+        }
 
 
-</script>
-
+    </script>
 
 {% endblock %}

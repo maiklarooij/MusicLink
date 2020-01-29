@@ -6,84 +6,81 @@
 
 {% block main %}
 
-
-
-<div style="margin-right: 7em; margin-left: 7em">
-    <div class="row">
-
-        <div class="col-sm-7 blocks-home animate-bottom shadowdiv">
-        <h2>What are your friends listening to?</h2>
-            {% if feed | length > 0 %}
-                {% for message in feed %}
-                <div class="feed-item whiteshadow">
-                    <div class="row flex feed-info">
-                        <div class="col- flex">
-                            <div class="row flex" style="align-items: center">
-                                <div class="col-">
-                                    <form action="/profile" method="post">
-                                        <button type="submit" value="{{ message['username'] }}" name="username" class="center-cropped-small" style="background: url({{ message['profilepic'] }}); background-position: center center; background-size: cover; cursor: pointer"></button>
-                                    </form>
+    <div style="margin-right: 7em; margin-left: 7em">
+        <div class="row">
+            <div class="col-sm-7 blocks-home animate-bottom shadowdiv">
+                <h2>What are your friends listening to?</h2>
+                    {% if feed | length > 0 %}
+                        {% for message in feed %}
+                        <div class="feed-item whiteshadow">
+                            <div class="row flex feed-info">
+                                <div class="col- flex">
+                                    <div class="row flex" style="align-items: center">
+                                        <div class="col-">
+                                            <form action="/profile" method="post">
+                                                <button type="submit" value="{{ message['username'] }}" name="username" class="center-cropped-small" style="background: url({{ message['profilepic'] }}); background-position: center center; background-size: cover; cursor: pointer"></button>
+                                            </form>
+                                        </div>
+                                        <div class="col-">
+                                            <form action="/profile" method="post">
+                                                <input type="submit" class="btn btn-default" value="{{ message['username'] }}" name="username" style="background-color: inherit; font-weight: bold;">
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-">
-                                    <form action="/profile" method="post">
-                                        <input type="submit" class="btn btn-default" value="{{ message['username'] }}" name="username" style="background-color: inherit; font-weight: bold;">
-                                    </form>
+                                <div class="col-sm">
+                                    {{ message['value'] }}
                                 </div>
+                                <div class="col-"></div>
+                                <div class="col-">
+                                    <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
+                                </div>
+                                <div class="col" style="font-size: 12px;">
+                                    <a class="link" href="{{ message['trackinfo']['uri'] }}">
+                                        {{ message['trackinfo']['name'] }} <br>
+                                        {{ message['trackinfo']['artists'][0]['name'] }}
+                                    </a>
+                                </div>
+
+                            </div>
+
+                            <div class="feed-time">
+                                {{ message['time'] }}
                             </div>
                         </div>
-                        <div class="col-sm">
-                            {{ message['value'] }}
-                        </div>
-                        <div class="col-"></div>
-                        <div class="col-">
-                            <img src="{{ message['trackinfo']['album']['images'][0]['url'] }}" style="width: 50px">
-                        </div>
-                        <div class="col" style="font-size: 12px;">
-                            <a class="link" href="{{ message['trackinfo']['uri'] }}">
-                                {{ message['trackinfo']['name'] }} <br>
-                                {{ message['trackinfo']['artists'][0]['name'] }}
-                            </a>
-                        </div>
 
+                        {% endfor %}
+                    {% else %}
+                        Your feed is empty, start following people
+                        <p></p>
+                        <form method="get" action="/friends">
+                            <button class="btn btn-primary" type="submit">Find friends!</button>
+                        </form>
+                {% endif %}
+            </div>
+            <div class="col-sm blocks-home shadowdiv animate-bottom" style="width: 125%">
+                <h2>Recommendations based on what your friends listen!</h2>
+                {% if not recommendations %}
+                    You are not following anyone! Start following users to get recommendations based on what they listen!
+                    <p></p>
+                    <form method="get" action="/friends">
+                        <button class="btn btn-primary" type="submit">Find friends!</button>
+                    </form>
+                {% endif %}
+                {% for recommendation in recommendations %}
+                <a href="{{ recommendation['link'] }}" target="_blank">
+                    <div class="row flex" href="{{ recommendation['link'] }}" style="padding-bottom: 1em; align-items: center;">
+                        <div class="col-2">
+                            <img src="{{ recommendation['img'] }}" width="50px">
+                        </div>
+                        <div class="col-8 link" style="font-size: 12px;">
+                            {{ ', '.join(recommendation['artists']) }} - {{ recommendation['name'] }}
+                        </div>
                     </div>
-
-                    <div class="feed-time">
-                        {{ message['time'] }}
-                    </div>
-                </div>
-
+                </a>
                 {% endfor %}
-            {% else %}
-                Your feed is empty, start following people
-                <p></p>
-                <form method="get" action="/friends">
-                    <button class="btn btn-primary" type="submit">Find friends!</button>
-                </form>
-        {% endif %}
-        </div>
-        <div class="col-sm blocks-home shadowdiv animate-bottom" style="width: 125%">
-            <h2>Recommendations based on what your friends listen!</h2>
-            {% if not recommendations %}
-                You are not following anyone! Start following users to get recommendations based on what they listen!
-                <p></p>
-                <form method="get" action="/friends">
-                    <button class="btn btn-primary" type="submit">Find friends!</button>
-                </form>
-            {% endif %}
-            {% for recommendation in recommendations %}
-            <a href="{{ recommendation['link'] }}" target="_blank">
-                <div class="row flex" href="{{ recommendation['link'] }}" style="padding-bottom: 1em; align-items: center;">
-                    <div class="col-2">
-                        <img src="{{ recommendation['img'] }}" width="50px">
-                    </div>
-                    <div class="col-8 link" style="font-size: 12px;">
-                        {{ ', '.join(recommendation['artists']) }} - {{ recommendation['name'] }}
-                    </div>
-                </div>
-            </a>
-            {% endfor %}
+            </div>
         </div>
     </div>
-</div>
 
 {% endblock %}

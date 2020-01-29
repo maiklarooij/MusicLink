@@ -1,43 +1,42 @@
+<div class="row">
+    <div class="col animate-bottom shadowdiv" style="margin-right: 1em; padding-top: 1em">
+        <b>Most listened songs</b>
+        </p>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for track in top_tracks %}
+            <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-        <div class="row">
-            <div class="col animate-bottom shadowdiv" style="margin-right: 1em; padding-top: 1em">
-                <b>Most listened songs</b>
-                </p>
-                </p>
-                <ul class="list-group list-group-flush">
-                    {% for track in top_tracks %}
-                    <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+    <div class="col animate-bottom shadowdiv" style="padding-top: 1em">
+        <b>Most listened artists</b>
+        </p>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for artist in top_artists %}
+            <li class="list-group-item"><img src= {{ artist[1] }} alt="track" width="35" height="35" align="left">{{ artist[0] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-        <div class="col animate-bottom shadowdiv" style="padding-top: 1em">
-            <b>Most listened artists</b>
-            </p>
-            </p>
-            <ul class="list-group list-group-flush">
-                {% for artist in top_artists %}
-                <li class="list-group-item"><img src= {{ artist[1] }} alt="track" width="35" height="35" align="left">{{ artist[0] }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+    <div class="col animate-bottom shadowdiv" style="margin-left: 1em; padding-top: 1em">
+        <b>Favorite genres</b>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for genre in genres %}
+            <li class="list-group-item">{{ genre }}</li>
+            {% endfor %}
+        </ul>
+        </p>
 
-        <div class="col animate-bottom shadowdiv" style="margin-left: 1em; padding-top: 1em">
-            <b>Favorite genres</b>
-            </p>
-            <ul class="list-group list-group-flush">
-                {% for genre in genres %}
-                <li class="list-group-item">{{ genre }}</li>
-                {% endfor %}
-            </ul>
-            </p>
-
-            <h6 style="padding-top: 40px;"><b>Recently played</b></h6>
-            </p>
-            <ul class="list-group list-group-flush">
-                {% for track in recent %}
-                <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        </div>
+        <h6 style="padding-top: 40px;"><b>Recently played</b></h6>
+        </p>
+        <ul class="list-group list-group-flush">
+            {% for track in recent %}
+            <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

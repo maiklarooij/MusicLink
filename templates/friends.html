@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Home
+    Friends
 {% endblock %}
 
 {% block main %}
@@ -28,7 +28,7 @@
         <h1 id="friendspage">Based on what you listen, we think you like these accounts!</h1>
         <div class="row">
             {% if potential_friends|length < 3 %}
-            <div class="col-sm"></div>
+                <div class="col-sm"></div>
             {% endif %}
             {% for user in potential_friends %}
 
@@ -48,7 +48,7 @@
 
             {% endfor %}
             {% if potential_friends|length < 3 %}
-            <div class="col-sm"></div>
+                <div class="col-sm"></div>
             {% endif %}
         </div>
     </div>
@@ -58,29 +58,37 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
 
+        // Get user input
         let input = document.querySelector('#search');
+
+        // Search for friends after each inputted key
         input.onkeyup = function() {
+            // Get results via JQuery get request
             $.get('/friendssearch?q=' + input.value, function(data) {
+                // Set the list with results to the requested results
                 document.querySelector('#results').innerHTML = data;
             });
         };
 
-
+        // After clicking follow or unfollow button, change the appearance of the button
         function changeButton(button) {
-            console.log(button.value)
+            // Get the username of the followed person
             username = button.value;
+            // Follow or unfollow user and change button
             $.ajax({
                 type: "GET",
                 url: "/follow?username=" + username,
                 datatype: "json",
                 async: false,
                 success: function(data) {
-                    console.log(data)
+                    // When following or unfollowing is succesfull
                     if (data == true) {
+                        // Set button to a unfollow button when followed
                         if (button.className == "btn btn-outline-light buttons-outline btn-sm") {
                             button.innerHTML = "Unfollow";
                             button.className = "btn btn-light text-white btn-sm buttons";
                         }
+                        // Set button to a follow button when unfollowed
                         else {
                             button.innerHTML = "Follow";
                             button.className = "btn btn-outline-light buttons-outline btn-sm";

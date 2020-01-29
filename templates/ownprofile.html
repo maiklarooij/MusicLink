@@ -68,7 +68,7 @@
                 </p>
                 <ul class="list-group list-group-flush">
                     {% for track in top_tracks %}
-                    <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+                        <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -79,7 +79,7 @@
             </p>
             <ul class="list-group list-group-flush">
                 {% for artist in top_artists %}
-                <li class="list-group-item"><img src= {{ artist[1] }} alt="track" width="35" height="35" align="left">{{ artist[0] }}</li>
+                    <li class="list-group-item"><img src= {{ artist[1] }} alt="track" width="35" height="35" align="left">{{ artist[0] }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -89,7 +89,7 @@
             </p>
             <ul class="list-group list-group-flush">
                 {% for genre in genres %}
-                <li class="list-group-item">{{ genre }}</li>
+                    <li class="list-group-item">{{ genre }}</li>
                 {% endfor %}
             </ul>
             </p>
@@ -98,7 +98,7 @@
             </p>
             <ul class="list-group list-group-flush">
                 {% for track in recent %}
-                <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
+                    <li class="list-group-item"><img src= {{ track[2] }} alt="track" width="35" height="35" align="left">{{ track[0] }} - {{ track[1] }}</li>
                 {% endfor %}
             </ul>
         </div>

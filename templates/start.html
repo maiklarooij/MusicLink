@@ -5,108 +5,122 @@
 {% endblock %}
 
 {% block main %}
-<body id="startbody" onload="hideColor()">
+    <body id="startbody" onload="hideColor()">
 
-    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-secondary shadowdiv" id="startdiv">
-        <div class="col-md-5 p-lg-5 mx-auto my-5 bg-light shadowdiv">
-            <h1 class="display-4 font-weight-bold" id="musiclink">MusicLink</h1>
-            <p class="lead font-weight-normal">
-                Discover new music with friends and see your listening habits, just by linking Spotify! Get started now!
-            </p>
-            <a class="btn btn-light text-white btn-lg buttons" href="/authorise">Register</a>
-            <p>Already an account? <a style="color: rgba(131,58,180,1); cursor: pointer" onclick="openLogin()">Log in here!</a></p>
-        </div>
-    </div>
-    <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 ">
-        <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden flex-grow-1 shadowdiv">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Discover what your friends listen to</h2>
-                <p class="lead">Get recommendation based on your friends listening habits.</p>
-                <img src="/static/friendship.png" width="200px">
+        <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-secondary shadowdiv" id="startdiv">
+            <div class="col-md-5 p-lg-5 mx-auto my-5 bg-light shadowdiv">
+                <h1 class="display-4 font-weight-bold" id="musiclink">MusicLink</h1>
+                <p class="lead font-weight-normal">
+                    Discover new music with friends and see your listening habits, just by linking Spotify! Get started now!
+                </p>
+                <a class="btn btn-light text-white btn-lg buttons" href="/authorise">Register</a>
+                <p>Already an account? <a style="color: rgba(131,58,180,1); cursor: pointer" onclick="openLogin()">Log in here!</a></p>
             </div>
         </div>
-        <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden flex-grow-1 shadowdiv">
-            <div class="my-3 py-3">
-                <h2 class="display-5">Insight in your Spotify behaviour</h2>
-                <p class="lead">Who are your favourite artists and tracks?</p>
-                <img src="/static/graph.png" width="200px">
-            </div>
-        </div>
-    </div>
 
-    <div class="form-popup bg-light shadowdiv" id="login">
-        <form action="/login" method="post" id="login">
-            <h2>Login</h2>
-            <div class="row" id="alert1" class="alert" style="display: none">
-                <div class="col-sm"></div>
-                <div class="col-sm">
-                    <div class="alert alert-warning fade show" role="alert" >
-                        <strong>Error!</strong> Username and/or password incorrect!
-                    </div>
+        <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3 ">
+            <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden flex-grow-1 shadowdiv">
+                <div class="my-3 py-3">
+                    <h2 class="display-5">Discover what your friends listen to</h2>
+                    <p class="lead">Get recommendation based on your friends listening habits.</p>
+                    <img src="/static/friendship.png" width="200px">
                 </div>
-                <div class="col-sm"></div>
             </div>
-            <div class="form-group">
-                <label for="username"><b>Username</b></label>
-                <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required autofocus>
+            <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden flex-grow-1 shadowdiv">
+                <div class="my-3 py-3">
+                    <h2 class="display-5">Insight in your Spotify behaviour</h2>
+                    <p class="lead">Who are your favourite artists and tracks?</p>
+                    <img src="/static/graph.png" width="200px">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="password"><b>Password</b></label>
-                <input type="password" id="password" class="form-control" placeholder="Enter password" name="password" required>
-            </div>
+        </div>
 
-            <button type="submit" class="btn btn-light text-white buttons">Login</button>
-        </form>
-    </div>
-</body>
+        <div class="form-popup bg-light shadowdiv" id="login">
+            <form action="/login" method="post" id="login">
+                <h2>Login</h2>
+                <div class="row" id="alert1" class="alert" style="display: none">
+                    <div class="col-sm"></div>
+                    <div class="col-sm">
+                        <div class="alert alert-warning fade show" role="alert" >
+                            <strong>Error!</strong> Username and/or password incorrect!
+                        </div>
+                    </div>
+                    <div class="col-sm"></div>
+                </div>
+                <div class="form-group">
+                    <label for="username"><b>Username</b></label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username" name="username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password"><b>Password</b></label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password" name="password" required>
+                </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+                <button type="submit" class="btn btn-light text-white buttons">Login</button>
+            </form>
+        </div>
+    </body>
 
-<script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
-    var opened = false;
-    function openLogin(){
-        if (opened == true) {
-            document.getElementById("login").style.display = 'none';
-        }
-        else {
-            document.getElementById("login").style.display = 'block';
-        }
-        opened = !opened;
-    }
+    <script>
 
-    function hideColor() {
-        document.querySelector(".background").style.display = 'none';
-        document.querySelector("main").style.top = "2em";
-    }
+        // Create a boolean to check if login popup is opened
+        var opened = false;
 
-    function check() {
-        username = document.getElementById("username").value;
-        password = document.getElementById("password").value;
-        $.ajax({
-            type: "GET",
-            url: "/checklogin?username=" + username + "&password=" + password,
-            datatype: "json",
-            async: false,
-            success: function(data) {
-                available = data;
+        // Opens or closes login popup
+        function openLogin(){
+            if (opened == true) {
+                document.getElementById("login").style.display = 'none';
             }
-        });
-        return available;
-    }
+            else {
+                document.getElementById("login").style.display = 'block';
+            }
+            // Set opened to the contrary to let the code know that the popup is opened or closed
+            opened = !opened;
+        }
 
-    (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            $('#login').on('submit', function(event) {
-                if (check() == false) {
-                    document.getElementById("alert1").style.display = 'inline-block';
-                    event.preventDefault();
+        // The gradient background needs to be hided on the start page
+        function hideColor() {
+            document.querySelector(".background").style.display = 'none';
+            document.querySelector("main").style.top = "2em";
+        }
+
+        // Checks if the login information is correct
+        function check() {
+            // Get inputted username and password
+            username = document.getElementById("username").value;
+            password = document.getElementById("password").value;
+
+            // Check the inputted username and password with the database via JQuery get request
+            $.ajax({
+                type: "GET",
+                url: "/checklogin?username=" + username + "&password=" + password,
+                datatype: "json",
+                async: false,
+                success: function(data) {
+                    // Set correct to true or false after checking
+                    correct = data;
                 }
             });
-        }, false);
-    })();
+            // Return true or false
+            return correct;
+        }
 
-</script>
+        // Fires when the login is submitted
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                $('#login').on('submit', function(event) {
+                    // Checks the login info, when false, display alert and stop submitting
+                    if (check() == false) {
+                        document.getElementById("alert1").style.display = 'inline-block';
+                        event.preventDefault();
+                    }
+                });
+            }, false);
+        })();
+
+    </script>
 
 {% endblock %}

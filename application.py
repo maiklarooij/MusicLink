@@ -113,7 +113,6 @@ def register():
 
         # Register new user
         register_user(spotify)
-        flash('Succesfully registered!')
 
         # Redirect user to home page
         return redirect("/home")
@@ -259,6 +258,7 @@ def ownprofile():
 
     # Get statistics from Spotify
     recent, genres, artists, tracks, username, profilepic = get_statistics(spotify, term, None, profile)
+
     following = db.execute("SELECT * FROM following WHERE followuserid=:id", id=session["user_id"])
     followers = db.execute("SELECT * FROM following WHERE followeduserid=:id", id=session["user_id"])
     # Render template which shows personal statistics
@@ -284,23 +284,39 @@ def friends():
 @app.route('/followinglist', methods=["GET"])
 @login_required
 def followinglist():
+    """ Returns a page where users see everyone that is followed """
+
+    # Get a list of followed users ids
+    following = get_following()
+
+    # Get all followed users
     followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
+
+    # Get information from followed users
     users = []
     for user in followinglist:
         users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followeduserid'])[0])
-    return render_template("following.html", followinglist=users)
+
+    # Return followed users
+    return render_template("following.html", followinglist=users, following=following)
 
 @app.route('/followerslist', methods=["GET"])
 @login_required
 def followerslist():
-    followinglist = db.execute("SELECT followeduserid FROM following WHERE followuserid=:id", id=session["user_id"])
-    following = [user['followeduserid'] for user in followinglist]
+    """ Returns a page where users see everyone that is following them """
 
+    # Get a list of followed users ids
+    following = get_following()
+
+    # Get a list of users that follow active user
     followerslist = db.execute("SELECT followuserid FROM following WHERE followeduserid=:id", id=session["user_id"])
+
+    # Get information from followers
     users = []
     for user in followerslist:
         users.append(db.execute("SELECT * FROM users WHERE userid=:user", user=user['followuserid'])[0])
 
+    # Return followers
     return render_template("followers.html", followerslist=users, following=following)
 
 @app.route('/friendssearch', methods=["GET"])

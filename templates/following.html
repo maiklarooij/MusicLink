@@ -5,25 +5,60 @@
 {% endblock %}
 
 {% block main %}
-    <h2><b>Following</b></h2>
-    </p>
-    <div style='float:center; display: flex; justify-content: center;'>
-        <ul class="list-group list-group-flush" style="width: 40%;">
-            {% for user in followinglist %}
-            <li class="list-group-item"><img src= {{ user['profilepic'] }} alt="nummer" width="35" height="35" align="left">
-            <div style='float:left; width:35%'>
-                <form action="/profile" method="POST">
-                    <input type="submit" class="btn default" value="{{ user['username'] }}" name='username'
-                    style="background-color: inherit; font-size: 20px; font-weight: bold; margin-left: 150px;">
-                </form>
+
+    <div class="blocks shadowdiv animate-bottom">
+        <h2><b>Following</b></h2>
+        {% for user in followinglist %}
+            <div class="row">
+                <div class="col">
+                    <input type="image" src="{{ user['profilepic'] }}" class="center-cropped-small" value="{{ user['username'] }}" name='username'>
+                </div>
+                <div class="col">
+                    <form action="/profile" method="POST">
+                        <input type="submit" class="btn default" value="{{ user['username'] }}" name='username' style="background-color: inherit; font-size: 20px; font-weight: bold">
+                    </form>
+                </div>
+                <div class="col">
+                    {% if user['userid'] in following %}
+                        <button type="submit" class="btn btn-light text-white btn-sm buttons" onclick="changeButton(this)" value="{{ user['username'] }}" name='follow'>Unfollow</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-light buttons-outline btn-sm" onclick="changeButton(this)" value="{{ user['username'] }}" name='follow'>Follow</button>
+                    {% endif %}
+                </div>
             </div>
-            <form action="/follow" method="post" style='float:right;'>
-                <button type="submit" class="btn btn-success btn-sm" value="{{ user['username'] }}" name='follow'>
-                    Unfollow
-                </button>
-            </form>
-            </li>
-            {% endfor %}
-        </ul>
+        {% endfor %}
     </div>
+
+    <script>
+
+        // After clicking follow or unfollow button, change the appearance of the button
+        function changeButton(button) {
+            // Get the username of the followed person
+            username = button.value;
+            // Follow or unfollow user and change button
+            $.ajax({
+                type: "GET",
+                url: "/follow?username=" + username,
+                datatype: "json",
+                async: false,
+                success: function(data) {
+                    // When following or unfollowing is succesfull
+                    if (data == true) {
+                        // Set button to a unfollow button when followed
+                        if (button.className == "btn btn-outline-light buttons-outline btn-sm") {
+                            button.innerHTML = "Unfollow";
+                            button.className = "btn btn-light text-white btn-sm buttons";
+                        }
+                        // Set button to a follow button when unfollowed
+                        else {
+                            button.innerHTML = "Follow";
+                            button.className = "btn btn-outline-light buttons-outline btn-sm";
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+
 {% endblock %}

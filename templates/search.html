@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Home
+    Search
 {% endblock %}
 
 {% block main %}
+
     <div class="row flex animate-bottom" style="align-items: center">
         <div class="col-sm"></div>
         <div class="col-">
@@ -21,19 +22,28 @@
         </div>
         <div class="col-lg"></div>
     </div>
+
     <div class="results"></div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
     <script>
+
+        // Get user input and chosen searchtype (artist, album or track)
         let input = document.querySelector('#search');
         let searchtype = document.querySelector('#select');
 
+        // Get results on every inputted symbol
         input.onkeyup = function() {
+            // Show results when there are at least three symbols inputted
             if (input.value.length >= 3) {
-               $.get('/searched?q=' + input.value + "&searchtype=" + searchtype.value, function(data) {
-                document.querySelector('.results').innerHTML = data;
+                // Get results via JQuery get request
+                $.get('/searched?q=' + input.value + "&searchtype=" + searchtype.value, function(data) {
+                    // Set results div to the requested results
+                    document.querySelector('.results').innerHTML = data;
                 });
             }
+            // When less symbols submitted, show HTML
             else {
                 document.querySelector('.results').innerHTML = "Give us a little bit more!";
             }
