@@ -1,6 +1,11 @@
 # MusicLink
 ## Maik Larooij, Enzo Delaney-Lamour en Cesar Groot Kormelink
 
+
+### Link to product video
+https://www.youtube.com/embed/p0WuhgaoysI
+
+
 ### Samenvatting
 
 "MusicLink" is een online sociaal netwerksite die gericht is op het ontdekken van nieuwe muziek. Gebruikers krijgen aanbevelingen op basis van eigen luistergedrag en het luistergedrag van gebruikers die gevolgd kunnen worden.
@@ -68,11 +73,4 @@ database waar alle informatie over de users, top luistergegevens, gedeelde liedj
 
 - Last.FM, op basis van Spotify gegevens laat deze website meest beluisterde nummers zien.
 - Pandora, stelt nieuwe nummers, playlisten en artiesten voor op basis van je eigen feedback. Je kan ook naar de muziek van je vrienden luisteren en je eigen ontdekte muziek met hun delen.
-
-
-### Product Video
-<iframe width="560" height="315" src="https://www.youtube.com/embed/p0WuhgaoysI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
- </iframe>
-
-
 
