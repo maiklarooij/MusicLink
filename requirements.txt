@@ -1,0 +1,9 @@
+cs50
+Flask
+Flask-Session
+requests
+base64
+json
+spotipy
+gunicorn
+psycopg2

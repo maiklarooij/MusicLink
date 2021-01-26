@@ -8,7 +8,7 @@ CLIENT_ID = "e351ac3d72594cad83fa632150e602df"
 CLIENT_SECRET = "80dd7e7676fb4a8ca76cedf2e417b57e"
 
 
-redirect_uri = "https://aed7133f-13a0-4d3f-89bc-a0dea558ee71-ide.cs50.xyz:8080/callback"
+redirect_uri = "https://ide-8f8b3b99182f4073a0ca78b13a6539ae-8080.cs50.xyz/callback"
 
 
 #Add needed scope from spotify user

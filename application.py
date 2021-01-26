@@ -13,9 +13,7 @@ import authorization
 
 # Configure application
 app = Flask(__name__)
-
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SECRET_KEY"] = b'Ko5\xc8\x13w\x8b\x8c\xc8\xa9\xa5\xf0P\x92"\x12'
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
@@ -23,7 +21,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db = SQL("sqlite:///musiclink.db")
+db = SQL(os.env.getenv("DATABASE_URL", "sqlite:///musiclink.db"))
 
 
 @app.route("/", methods=["GET"])
